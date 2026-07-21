@@ -17,11 +17,13 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky",
+    "prepare": "husky && npm run build -w packages/shared",
     "test": "npm run test --workspaces --if-present",
     "test:watch": "npm run test:watch --workspaces --if-present",
     "test:coverage": "npm run test:coverage --workspaces --if-present",
-    "build": "echo 'build not yet configured - see specs/FLO-002-backend-bootstrap.md and specs/FLO-003-frontend-bootstrap.md' && exit 0"
+    "type-check": "npm run type-check --workspaces --if-present",
+    "build": "npm run build -w packages/shared && npm run build -w backend && npm run build -w frontend",
+    "dev": "npm run build -w packages/shared && concurrently -n shared,backend,frontend -c blue,green,magenta \"npm run dev -w packages/shared\" \"npm run dev -w backend\" \"npm run dev -w frontend\""
   },
   "lint-staged": {
     "*.{ts,tsx}": [
@@ -34,6 +36,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "concurrently": "^9.2.4",
     "eslint": "^10.7.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.1.1",
