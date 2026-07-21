@@ -2,6 +2,10 @@
 
 **Phase:** 4 — Deployment & Release Readiness
 
+**Status:**
+- [ ] Not Started
+- [ ] Completed
+
 ## Description
 
 Deploy the application to live, free-tier hosting: frontend to a static host (Vercel/Netlify/Render Static Site), backend to a Node host (Render/Railway/Fly.io), and database to a managed free-tier Postgres (Supabase/Neon/Render Postgres) — per the assignment's explicitly acceptable options. AWS is preferred but optional/bonus per the assignment ("AWS deployment is optional and will be treated as a bonus... candidate is not expected to spend money"); this spec targets the assignment's actual required bar (a working live deployment on any free platform) and documents AWS as a possible future upgrade rather than a requirement.

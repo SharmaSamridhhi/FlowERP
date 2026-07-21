@@ -2,6 +2,10 @@
 
 **Phase:** 3 — Core Business Modules
 
+**Status:**
+- [ ] Not Started
+- [ ] Completed
+
 ## Description
 
 Build the frontend for the Sales Challan module against the API FLO-015 established: a multi-line challan builder (select customer, add products with quantities, live total), a challan list with status filtering, and a detail/print-style view. This is the most interaction-heavy screen in the whole application — the only place a user assembles a multi-row document interactively — so it's kept as its own spec rather than folded into FLO-015, to give it dedicated design and testing attention.

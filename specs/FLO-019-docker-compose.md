@@ -2,6 +2,10 @@
 
 **Phase:** 4 — Deployment & Release Readiness
 
+**Status:**
+- [ ] Not Started
+- [ ] Completed
+
 ## Description
 
 Containerize the entire application: a `Dockerfile` for `backend`, a `Dockerfile` for `frontend`, and a root-level `docker-compose.yml` that orchestrates backend, frontend, and a PostgreSQL service so the whole system runs with a single command. This is treated as mandatory for this project regardless of the assignment listing Docker as a bonus. It's sequenced after FLO-018 specifically because a correct Compose setup needs a settled, validated environment-variable contract to wire into each service.

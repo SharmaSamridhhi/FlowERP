@@ -2,6 +2,10 @@
 
 **Phase:** 2 — Engineering Foundations (Good Practices I)
 
+**Status:**
+- [ ] Not Started
+- [ ] Completed
+
 ## Description
 
 Turn `packages/shared` into the single source of truth for request/response shapes shared between frontend and backend: a standard success-response envelope, pagination/filter/search query-param helpers, and the convention that every entity's Zod schema (once authored by its owning Phase 3 spec) lives in `packages/shared` so both apps import the *same* schema and the *same* inferred TypeScript type. This spec also builds the frontend's base API client (fetch wrapper + TanStack Query setup) that consumes this envelope. Without this in place before Phase 3, backend and frontend types for the same entity would inevitably drift.

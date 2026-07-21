@@ -2,6 +2,10 @@
 
 **Phase:** 1 — Project Foundation
 
+**Status:**
+- [ ] Not Started
+- [x] Completed
+
 ## Description
 
 Stand up the backend application skeleton in the `backend/` workspace: Express.js on Node.js with TypeScript, a layered folder structure (routes/controllers/services), strict TS compiler config, a config-loading module, and a single working health-check endpoint. This is plumbing only — no business entities, no auth, no validation framework (those are later specs) — the goal is a backend that boots, responds to one request, and has a folder structure every later module slots into without restructuring.

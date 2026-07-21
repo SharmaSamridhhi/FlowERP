@@ -2,6 +2,10 @@
 
 **Phase:** 3 — Core Business Modules
 
+**Status:**
+- [ ] Not Started
+- [ ] Completed
+
 ## Description
 
 Implement the assignment's Customer CRM module in full: backend CRUD + search/pagination + follow-up notes API, and the corresponding frontend screens (list, add/edit form, detail page with follow-up history). This is the first fully-realized vertical slice built on every Phase 1/2 foundation — it sets the concrete pattern (Zod schema in `packages/shared` → service/controller/routes → `DataTable`-based list page → detail page) that FLO-013, FLO-015, and FLO-017 will each follow for their own entity.

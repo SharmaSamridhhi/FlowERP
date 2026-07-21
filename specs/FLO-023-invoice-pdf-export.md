@@ -2,6 +2,10 @@
 
 **Phase:** 5 — Engineering Improvements (Good Practices II)
 
+**Status:**
+- [ ] Not Started
+- [ ] Completed
+
 ## Description
 
 Implement the "invoices" entity named in the assignment's Business Context and the "Export invoice as PDF" bonus point, modeled as a document generated from a Confirmed Sales Challan — the standard wholesale/distribution flow (challan is the delivery record, invoice is the billing record derived from it). This is placed in Phase 5 because it's explicitly a bonus feature, and because Sales Challan (FLO-015/016) is fully functional as the assignment's actual required deliverable without it — deferring invoicing doesn't block or compromise any earlier phase.

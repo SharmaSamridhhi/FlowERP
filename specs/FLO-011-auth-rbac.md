@@ -2,6 +2,10 @@
 
 **Phase:** 3 — Core Business Modules
 
+**Status:**
+- [ ] Not Started
+- [ ] Completed
+
 ## Description
 
 Implement the assignment's first required core module: login with JWT-based authentication and four roles (Admin, Sales, Warehouse, Accounts). This spec delivers the `User` data access layer, password hashing, login/me endpoints, a backend RBAC middleware (route-level role guards), and the frontend login screen, auth context, protected-route wrapper, and role-aware sidebar navigation. Every subsequent Phase 3 module depends on this — it's the first spec allowed to touch real business data end-to-end, and it's what makes "protected" meaningful for every module after it.

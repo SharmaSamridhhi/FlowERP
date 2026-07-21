@@ -2,6 +2,10 @@
 
 **Phase:** 4 — Deployment & Release Readiness
 
+**Status:**
+- [ ] Not Started
+- [ ] Completed
+
 ## Description
 
 Formalize environment variable management across `backend` and `frontend`: Zod-validated env schemas that fail fast on a missing/malformed variable at startup, `.env.example` files documenting every variable, and a consistent convention for what's a secret vs. what's safe to expose to the frontend bundle. Earlier specs (FLO-002, FLO-003, FLO-011) read `process.env`/`import.meta.env` directly with informal defaults — this spec replaces those informal reads with the validated pattern and is the foundation FLO-019 (Docker) and FLO-020 (hosting) both configure environments against.
