@@ -27,6 +27,51 @@ describe("GET /internal/validation-demo", () => {
   });
 });
 
+describe("GET /internal/validation-demo/paginated", () => {
+  it("returns the { data, meta: { pagination } } envelope shape", async () => {
+    const response = await request(app).get("/internal/validation-demo/paginated?page=1&limit=10");
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      data: expect.any(Array),
+      meta: {
+        pagination: { page: 1, limit: 10, total: 25, totalPages: 3 },
+      },
+    });
+    expect(response.body.data).toHaveLength(10);
+    expect(response.body.data[0]).toEqual({ id: 1, name: "Demo item 1" });
+  });
+
+  it("applies defaults when page/limit are omitted", async () => {
+    const response = await request(app).get("/internal/validation-demo/paginated");
+
+    expect(response.status).toBe(200);
+    expect(response.body.meta.pagination).toEqual({
+      page: 1,
+      limit: 20,
+      total: 25,
+      totalPages: 2,
+    });
+  });
+
+  it("filters by search and paginates the filtered result", async () => {
+    const response = await request(app).get(
+      "/internal/validation-demo/paginated?search=Demo item 1&limit=5",
+    );
+
+    // "Demo item 1" matches items 1, 10-19 (11 total: "1", "10".."19")
+    expect(response.body.meta.pagination.total).toBe(11);
+    expect(response.body.data).toHaveLength(5);
+  });
+
+  it("rejects an out-of-range limit with 400", async () => {
+    const response = await request(app).get("/internal/validation-demo/paginated?limit=1000");
+
+    expect(response.status).toBe(400);
+    expect(response.body.error.code).toBe("VALIDATION_ERROR");
+  });
+});
+
 describe("GET /internal/validation-demo/not-found", () => {
   it("maps a thrown NotFoundError to 404 without any response-handling code in the controller", async () => {
     const response = await request(app).get("/internal/validation-demo/not-found");
