@@ -3,8 +3,9 @@
 **Phase:** 2 — Engineering Foundations (Good Practices I)
 
 **Status:**
+
 - [ ] Not Started
-- [ ] Completed
+- [x] Completed
 
 ## Description
 
@@ -17,6 +18,7 @@ As any developer working in this repo, I want linting and formatting enforced au
 ## Scope
 
 **Included:**
+
 - Root-level ESLint config (flat config) with a base ruleset (`@typescript-eslint`, `eslint-config-prettier` to disable stylistic conflicts) extended by package-specific overrides (React hooks/JSX rules for `frontend` only).
 - Root-level Prettier config (`.prettierrc`) and `.prettierignore`, shared by all packages — one formatting standard, not per-package variants.
 - `npm run lint` / `npm run lint:fix` / `npm run format` scripts at the root that fan out across workspaces.
@@ -25,8 +27,9 @@ As any developer working in this repo, I want linting and formatting enforced au
 - ESLint rule enforcing no unused vars/imports and no explicit `any` (warn-level minimum) — TypeScript strictness matters for a codebase multiple specs will extend.
 
 **Excluded:**
+
 - Test runner configuration (FLO-006).
-- CI wiring that runs lint on every PR (FLO-010) — this spec makes lint *runnable and enforced locally*; CI is a separate concern layered on top.
+- CI wiring that runs lint on every PR (FLO-010) — this spec makes lint _runnable and enforced locally_; CI is a separate concern layered on top.
 
 ## Acceptance Criteria
 

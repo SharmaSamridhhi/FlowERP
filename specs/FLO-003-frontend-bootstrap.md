@@ -3,6 +3,7 @@
 **Phase:** 1 — Project Foundation
 
 **Status:**
+
 - [ ] Not Started
 - [x] Completed
 
@@ -17,6 +18,7 @@ As a frontend developer, I want a running React + TypeScript app with routing an
 ## Scope
 
 **Included:**
+
 - Vite + React + TypeScript project in `frontend/`.
 - React Router configured with a minimal route table (e.g., `/`, `/login` as placeholders returning stub text) and a not-found route.
 - Tailwind CSS installed and configured (PostCSS config, base Tailwind directives in the global stylesheet), verified with one visibly-styled element.
@@ -26,6 +28,7 @@ As a frontend developer, I want a running React + TypeScript app with routing an
 - Responsive viewport meta tag and a base CSS reset consistent with the "Responsive UI" requirement.
 
 **Excluded:**
+
 - Any real UI components, design tokens, or component library (FLO-009).
 - API client / data fetching setup beyond confirming the env module reads a base URL variable (FLO-008 defines the actual client and contracts).
 - Authentication screens or route guarding (FLO-011).

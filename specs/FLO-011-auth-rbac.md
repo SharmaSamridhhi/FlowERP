@@ -3,6 +3,7 @@
 **Phase:** 3 — Core Business Modules
 
 **Status:**
+
 - [ ] Not Started
 - [ ] Completed
 
@@ -17,15 +18,17 @@ As an internal employee (Admin, Sales, Warehouse, or Accounts), I want to log in
 ## Scope
 
 **Included:**
+
 - Backend: `POST /auth/login` (email + password → JWT + basic user profile), `GET /auth/me` (returns the current user from a valid token). Password hashing with `bcrypt`. JWT signed with a secret from env (FLO-018 formalizes env management; for now, reads `process.env.JWT_SECRET` directly per FLO-002's config module pattern), reasonable expiry (e.g., 8h, documented).
 - Backend: `authenticate` middleware (verifies JWT, attaches `req.user`) and `authorize(...roles)` middleware factory (403s if `req.user.role` isn't in the allowed list) — both live in `src/middlewares` per FLO-002's layout and are what every later module's routes import.
 - Backend: seed script (extending FLO-004's `prisma/seed.ts` stub) creating one demo user per role with known credentials, documented in this module's implementation notes and later surfaced in FLO-021's submission package.
 - Zod schemas for login request/response in `packages/shared` per FLO-008's convention.
 - Frontend: `LoginPage` (using `AuthLayoutTemplate` from FLO-009), an `AuthContext`/hook storing the current user + token in memory, a `ProtectedRoute` wrapper redirecting unauthenticated users to `/login`, and wiring the FLO-008 API client's `getAuthToken()` hook point to this context.
 - Frontend: `AppSidebar` (from FLO-009) now receives real, role-filtered nav items and a working logout action.
-- Route-level role restrictions matching the assignment's role list are decided and documented per module as those modules are built (e.g., "who can confirm a challan" is FLO-015's decision) — this spec provides the *mechanism* (`authorize(...)`), not every future policy decision.
+- Route-level role restrictions matching the assignment's role list are decided and documented per module as those modules are built (e.g., "who can confirm a challan" is FLO-015's decision) — this spec provides the _mechanism_ (`authorize(...)`), not every future policy decision.
 
 **Excluded:**
+
 - User self-registration or password reset flows (not required by the assignment; Admin-created/seeded users are sufficient for an internal tool).
 - Per-field/per-action fine-grained permissions beyond role-level route guarding (the assignment asks for role-based access, not a full permissions matrix).
 - Refresh-token rotation (a single reasonably-short-lived access token is the documented, deliberate choice — see Implementation Notes).

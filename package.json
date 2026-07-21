@@ -2,6 +2,7 @@
   "name": "flowerp",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "description": "Mini ERP + CRM Operations Portal for a wholesale/distribution company.",
   "engines": {
     "node": ">=20.19.0"
@@ -12,9 +13,32 @@
     "packages/*"
   ],
   "scripts": {
-    "lint": "echo 'lint not yet configured - see specs/FLO-005-lint-format-precommit.md' && exit 0",
-    "format": "echo 'format not yet configured - see specs/FLO-005-lint-format-precommit.md' && exit 0",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky",
     "test": "echo 'tests not yet configured - see specs/FLO-006-testing-infrastructure.md' && exit 0",
     "build": "echo 'build not yet configured - see specs/FLO-002-backend-bootstrap.md and specs/FLO-003-frontend-bootstrap.md' && exit 0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.7.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.9.6",
+    "typescript-eslint": "^8.65.0"
   }
 }

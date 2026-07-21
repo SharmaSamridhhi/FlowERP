@@ -3,6 +3,7 @@
 **Phase:** 4 — Deployment & Release Readiness
 
 **Status:**
+
 - [ ] Not Started
 - [ ] Completed
 
@@ -17,6 +18,7 @@ As a developer (or reviewer) setting up this project, I want to run the entire s
 ## Scope
 
 **Included:**
+
 - `backend/Dockerfile`: multi-stage build (a `build` stage running `npm ci` + `tsc`, a slim `runtime` stage copying only `dist/` and production `node_modules`), running as a non-root user, exposing the configured port, running Prisma migrations on container start (via an entrypoint script or a documented Compose `command` override) before starting the server.
 - `frontend/Dockerfile`: multi-stage build (a `build` stage running `npm ci` + `vite build`, a slim `runtime` stage serving the static `dist/` output via a minimal static server such as `nginx` or `serve`).
 - Root `docker-compose.yml` defining three services: `db` (official `postgres` image, named volume for data persistence, health check), `backend` (built from `backend/Dockerfile`, depends on `db` health check passing, reads env vars per FLO-018's contract — supplied via a root `.env` file referenced by Compose, consistent with `.env.example`), `frontend` (built from `frontend/Dockerfile`, depends on `backend`, `VITE_API_BASE_URL` pointed at the backend service).
@@ -25,6 +27,7 @@ As a developer (or reviewer) setting up this project, I want to run the entire s
 - `.dockerignore` for both `backend` and `frontend` (excluding `node_modules`, `.git`, `dist`, test files) to keep build contexts small and build cache effective.
 
 **Excluded:**
+
 - Any production-specific orchestration (Kubernetes, ECS task definitions, etc.) — Compose is the full extent of the containerization requirement for this project, per project instructions ("designed to run entirely through a root-level docker-compose.yml").
 - Pushing built images to a registry (that's part of FLO-020/FLO-022 if the chosen hosting path uses container images at all — many of the assignment's suggested free hosts don't require it).
 
@@ -54,6 +57,6 @@ FLO-002, FLO-003, FLO-004, FLO-018.
 
 ## Implementation Notes
 
-- Vite bakes `VITE_*` variables into the static build at *build time*, not runtime — meaning `docker-compose.yml` must pass `VITE_API_BASE_URL` as a Docker build `arg` to the frontend service (`build.args` in Compose), not as a plain runtime `environment` entry, or the built static files will silently ignore it. This is a common Docker+Vite pitfall; get it right here so FLO-020 doesn't inherit a broken assumption.
+- Vite bakes `VITE_*` variables into the static build at _build time_, not runtime — meaning `docker-compose.yml` must pass `VITE_API_BASE_URL` as a Docker build `arg` to the frontend service (`build.args` in Compose), not as a plain runtime `environment` entry, or the built static files will silently ignore it. This is a common Docker+Vite pitfall; get it right here so FLO-020 doesn't inherit a broken assumption.
 - Running Prisma migrations automatically on backend container start is convenient for this project's scale (a single-instance local/demo deployment) but would be unsafe for a multi-instance production rollout (concurrent migration races). That tradeoff is acceptable and worth documenting explicitly, not silently accepting — this system is not being deployed at a scale where that matters.
 - Keep the Postgres service's credentials in Compose's `.env.example` clearly marked as local-development-only defaults, never suggesting they're safe for a real deployment.

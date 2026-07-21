@@ -3,6 +3,7 @@
 **Phase:** 2 — Engineering Foundations (Good Practices I)
 
 **Status:**
+
 - [ ] Not Started
 - [ ] Completed
 
@@ -17,6 +18,7 @@ As a backend developer building a business module, I want a standard way to vali
 ## Scope
 
 **Included:**
+
 - `AppError` base class (message, HTTP status code, optional machine-readable error code) and a small set of subclasses covering the cases the assignment explicitly calls out: `ValidationError` (400), `UnauthorizedError` (401), `ForbiddenError` (403), `NotFoundError` (404), `ConflictError` (409) — used, for example, by the insufficient-stock case in Sales Challan (FLO-015).
 - A `validateRequest(schema)` middleware factory taking a Zod schema (shaped as `{ body?, query?, params? }`) that parses the request, attaches the parsed/typed result, and calls `next(new ValidationError(...))` with field-level details on failure.
 - A centralized error-handling Express middleware (registered last) that: recognizes `AppError` instances and responds with their status/message/code; recognizes raw Zod errors and Prisma known-error codes as a fallback and maps them to appropriate statuses; treats anything unrecognized as a 500 and logs it server-side without leaking internals to the client.
@@ -24,7 +26,8 @@ As a backend developer building a business module, I want a standard way to vali
 - Applied and proven against the `/health` route or a small throwaway demo route with a query-param schema — not against real business routes, which don't exist yet.
 
 **Excluded:**
-- The success-response envelope shape and pagination helpers (FLO-008) — this spec owns *errors*, FLO-008 owns the *happy-path* envelope and query utilities, and they compose together.
+
+- The success-response envelope shape and pagination helpers (FLO-008) — this spec owns _errors_, FLO-008 owns the _happy-path_ envelope and query utilities, and they compose together.
 - Any actual business validation schemas (customer, product, challan, PO) — those are authored by their owning Phase 3 spec, using the pattern this spec establishes.
 - Frontend error handling/toast display — that's part of the shared API client in FLO-008 and consumed per-screen in Phase 3 frontends.
 

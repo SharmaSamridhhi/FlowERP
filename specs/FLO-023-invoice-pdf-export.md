@@ -3,6 +3,7 @@
 **Phase:** 5 — Engineering Improvements (Good Practices II)
 
 **Status:**
+
 - [ ] Not Started
 - [ ] Completed
 
@@ -17,6 +18,7 @@ As an Accounts user, I want to generate an invoice from a confirmed challan and 
 ## Scope
 
 **Included:**
+
 - Backend: `Invoice` Prisma model (added now, not in FLO-004, per the scope decision recorded in [specs/README.md](README.md)) — invoice number (auto-generated, same generation approach as challans/POs for consistency), relation to its source `SalesChallan` (one invoice per challan; generating twice for the same challan is rejected), line items and totals **copied from the challan's own snapshotted line items** at generation time (not re-fetched from live product data), generated-by/generated-at fields.
 - `POST /challans/:id/invoice` (generates the invoice; only valid for a Confirmed challan), `GET /invoices` (paginated, searchable/filterable), `GET /invoices/:id`, `GET /invoices/:id/pdf` (streams a generated PDF).
 - PDF generation via a lightweight PDF library (e.g., `pdfkit` or `@react-pdf/renderer`) producing a clean, readable invoice document: company/customer details, line items with quantities/prices/line totals, grand total, invoice number, date.
@@ -25,6 +27,7 @@ As an Accounts user, I want to generate an invoice from a confirmed challan and 
 - Role access: Accounts and Admin can generate invoices; broader read access, following the established role-matrix precedent.
 
 **Excluded:**
+
 - Editing an invoice after generation (an invoice is a generated snapshot of a confirmed challan at a point in time — corrections happen by addressing the underlying challan/business process, not by mutating a billing document after the fact).
 - Payment tracking/status (paid/unpaid, partial payments) — not mentioned anywhere in the assignment; out of scope for this bonus feature.
 - Emailing the invoice to the customer — the assignment's bonus is specifically "Export invoice as PDF," which this spec satisfies via download; sending it is a further feature not requested.

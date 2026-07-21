@@ -3,6 +3,7 @@
 **Phase:** 5 — Engineering Improvements (Good Practices II)
 
 **Status:**
+
 - [ ] Not Started
 - [ ] Completed
 
@@ -17,6 +18,7 @@ As a Warehouse or Admin user, I want to attach a photo to a product, so that pro
 ## Scope
 
 **Included:**
+
 - `Product.imageUrl` (nullable) added via migration, extending FLO-004's `Product` model now that this feature is actually being built.
 - Backend: an upload endpoint (`POST /products/:id/image`) accepting a multipart image upload (validated: allowed content-types, max file size), uploading it to a configured S3 bucket (via the AWS SDK), and persisting the resulting object URL on the product — or, as a documented alternative, a presigned-URL flow (`GET /products/:id/image-upload-url` returning a presigned S3 PUT URL the frontend uploads to directly, then `PATCH /products/:id` with the resulting URL) if that approach is preferred for not routing binary uploads through the Express server (pick one, document the choice).
 - AWS credentials and bucket name added to the backend's env contract (extending FLO-018's schema and `.env.example`) — `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `S3_BUCKET_NAME`.
@@ -24,6 +26,7 @@ As a Warehouse or Admin user, I want to attach a photo to a product, so that pro
 - Basic validation: file type restricted to common image formats (jpeg/png/webp), file size capped (e.g., 5MB), rejected clearly if violated.
 
 **Excluded:**
+
 - Image editing/cropping/resizing (an out-of-scope enhancement beyond "upload a product image").
 - Multiple images per product (the assignment's bonus is singular — "upload product image" — one image per product is sufficient).
 - CDN/CloudFront fronting the bucket (a further optimization not requested; direct S3 object URLs, with the bucket's public-read policy scoped narrowly to the image path prefix, are sufficient for this project's scope).

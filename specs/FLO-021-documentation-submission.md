@@ -3,6 +3,7 @@
 **Phase:** 4 — Deployment & Release Readiness
 
 **Status:**
+
 - [ ] Not Started
 - [ ] Completed
 
@@ -17,6 +18,7 @@ As an evaluator reviewing this submission, I want a single README that tells me 
 ## Scope
 
 **Included:**
+
 - Root `README.md` covering, per the assignment's explicit documentation requirements: how the server was set up, how environment variables are managed (referencing FLO-018), how to run the project locally (both native `npm` workflow and `docker compose up`, referencing FLO-019), how to deploy the project (referencing FLO-020's runbook), and any assumptions made (the scope decisions this roadmap recorded along the way — Purchase Orders, Invoices, cancel-after-confirm/receive policies, role matrices, etc., pulled from each spec's Implementation Notes into one consolidated place).
 - Test login credentials for all four roles, clearly presented (matching FLO-011's seed data).
 - Live frontend URL and live backend API URL (if FLO-020 completed live deployment) or, per the assignment's sanctioned fallback, a clear statement that local/Docker setup plus a screen recording stand in for live URLs.
@@ -26,6 +28,7 @@ As an evaluator reviewing this submission, I want a single README that tells me 
 - If a full live deployment wasn't completed per FLO-020's sanctioned fallback: a screen recording of the full flow (this spec covers writing the README section describing/linking it; actually producing the recording is a manual step the user performs, noted here as a task this spec's implementer should flag to the user rather than silently skip).
 
 **Excluded:**
+
 - Any new application feature or bug fix discovered while writing documentation — if writing this spec surfaces a real defect against an earlier spec, that's a follow-up task against that spec, not something patched inline here.
 - API documentation generated via an in-code tool (e.g., Swagger/OpenAPI autogeneration) — the Postman collection satisfies the assignment's explicit requirement ("Postman collection or API documentation") without adding a new documentation-generation dependency; if OpenAPI is preferred instead, that's a valid substitution, but the two are not both required.
 
@@ -53,5 +56,5 @@ FLO-011, FLO-012, FLO-013, FLO-014, FLO-015, FLO-016, FLO-017, FLO-019, FLO-020.
 
 ## Implementation Notes
 
-- This spec depends on essentially all of Phase 3 plus Docker/deployment specifically because it's a documentation *consolidation* spec — writing it earlier would mean documenting features that don't exist yet or re-writing sections repeatedly as modules land. Sequencing it last in Phase 4 (after Phase 3 and after FLO-019/020) means it's written once, accurately.
+- This spec depends on essentially all of Phase 3 plus Docker/deployment specifically because it's a documentation _consolidation_ spec — writing it earlier would mean documenting features that don't exist yet or re-writing sections repeatedly as modules land. Sequencing it last in Phase 4 (after Phase 3 and after FLO-019/020) means it's written once, accurately.
 - Producing an actual screen recording is outside what a coding-focused implementation can do autonomously — this spec's job is to prepare the README section that references it and to explicitly flag to the user that the recording itself is a manual step they need to perform, not to silently mark that submission requirement as satisfied without it.

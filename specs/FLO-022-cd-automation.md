@@ -3,6 +3,7 @@
 **Phase:** 5 — Engineering Improvements (Good Practices II)
 
 **Status:**
+
 - [ ] Not Started
 - [ ] Completed
 
@@ -17,6 +18,7 @@ As a developer merging an approved change to `main`, I want the live frontend an
 ## Scope
 
 **Included:**
+
 - A `deploy` job/workflow triggered on `push` to `main` (after FLO-010's checks would have already passed as part of the PR that merged), running only once CI is green — either as a second job in the same workflow gated on the test job succeeding, or a separate workflow scoped to `main` pushes.
 - Deployment steps appropriate to whatever hosting targets FLO-020 actually used (e.g., triggering a Render/Railway deploy hook, or pushing to Vercel/Netlify via their GitHub integration/CLI) — using the specific mechanism documented in FLO-020's runbook, not a generic/hypothetical one.
 - Database migrations run as an explicit, ordered step before the backend redeploy completes serving traffic (`prisma migrate deploy` against production), not left to happen implicitly.
@@ -24,6 +26,7 @@ As a developer merging an approved change to `main`, I want the live frontend an
 - Deployment status visible in the Actions run (clear success/failure, with failure not silently leaving the live app on a broken build).
 
 **Excluded:**
+
 - Rollback automation (if a deploy fails or introduces a regression, rolling back is a manual action using the hosting provider's own tools — building automated rollback is disproportionate to this project's scope).
 - Any change to the CI checks themselves (FLO-010's lint/test/build gate is reused as-is, not modified).
 

@@ -16,10 +16,12 @@ This document is the binding Git policy for implementing the specs under [`/spec
 ## While implementing
 
 Allowed without asking:
+
 - Creating commits, amending local (unpushed) commits, rebasing locally, and any Git read operation (log, diff, status, branch, show, blame, etc.).
 - All commits must follow [Conventional Commits](https://www.conventionalcommits.org/): `type(scope): subject`, e.g. `feat(customers): add customer search endpoint`, `test(auth): cover role guard rejection paths`, `chore(FLO-004): add prisma migration`. Prefer scoping to the module or spec ID.
 
 Never do, under any circumstances, without the user explicitly instructing it in that moment:
+
 - Push any branch to a remote.
 - Create a Pull Request.
 - Merge into `main`.
@@ -31,6 +33,7 @@ If in doubt whether an action counts as one of the above, treat it as prohibited
 ## Completing a specification
 
 Before declaring a specification done:
+
 1. Verify every item in that spec's **Acceptance Criteria** is satisfied.
 2. Run and pass the full test suite for the affected package(s).
 3. Run and pass linting.
@@ -41,6 +44,7 @@ Before declaring a specification done:
 Once all of the above pass, stop. Do not push, do not open a PR, do not merge. Ask the user to review the implementation.
 
 From there:
+
 - The user pushes the branch, opens the Pull Request, and merges it into `main`.
 - The user tells you explicitly when the PR has been reviewed and merged, and that local `main` is up to date (or you must pull it yourself once told to).
 - You must not begin implementing another specification until this confirmation is given. Treat "I merged it" or "go ahead with the next one" as the confirmation; treat silence or an unrelated message as not confirmation.

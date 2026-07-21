@@ -3,6 +3,7 @@
 **Phase:** 3 — Core Business Modules
 
 **Status:**
+
 - [ ] Not Started
 - [ ] Completed
 
@@ -17,6 +18,7 @@ As a Sales user, I want to create, edit, search, and view customers, including l
 ## Scope
 
 **Included:**
+
 - Backend REST endpoints: `POST /customers`, `GET /customers` (paginated, searchable by name/mobile/email/business name, filterable by `type` and `status`), `GET /customers/:id` (includes follow-up history), `PATCH /customers/:id`, `POST /customers/:id/follow-ups` (append a follow-up note; also updates the customer's `followUpDate` if provided).
 - All fields from the assignment: name, mobile, email, business name, GST number (optional), type (Retail/Wholesale/Distributor), address, status (Lead/Active/Inactive), follow-up date, notes.
 - Zod schemas (`customer.schema.ts`) in `packages/shared` for create/update/query, following FLO-008's pagination/search convention.
@@ -25,6 +27,7 @@ As a Sales user, I want to create, edit, search, and view customers, including l
 - Empty/loading/error states on every screen, using FLO-009's `DataTable` states and FLO-008's typed API errors surfaced via the `Toast` molecule.
 
 **Excluded:**
+
 - Customer deletion (not requested by the assignment — only add/edit/search/view/follow-up are listed).
 - Any linkage to Sales Challans (a customer's challan history) — that view is added when FLO-016 (Sales Challan frontend) exists; this spec's detail page shows customer + follow-ups only.
 - Bulk import/export of customers.

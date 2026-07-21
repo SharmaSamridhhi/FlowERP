@@ -3,6 +3,7 @@
 **Phase:** 2 — Engineering Foundations (Good Practices I)
 
 **Status:**
+
 - [ ] Not Started
 - [ ] Completed
 
@@ -17,6 +18,7 @@ As a frontend developer building a business module screen, I want a ready set of
 ## Scope
 
 **Included:**
+
 - Design tokens in `tailwind.config.ts`: a small brand/neutral color palette, spacing scale (Tailwind defaults extended only where needed), typography scale — enough to make "admin-style" visually consistent, not a full brand system.
 - **Atoms:** `Button` (variants: primary/secondary/danger/ghost; sizes; loading state), `Input`, `Select`, `Textarea`, `Badge` (for status pills — Lead/Active/Inactive, Draft/Confirmed/Cancelled, etc.), `Spinner`, `Label`, `IconButton`.
 - **Molecules:** `FormField` (label + input + error message, composing atoms, designed to plug into a Zod-validated form), `SearchBar`, `Pagination` (built against the FLO-008 pagination meta shape), `Modal`/`Dialog`, `Toast`/notification (for success/error feedback, consuming FLO-008's typed API errors).
@@ -26,6 +28,7 @@ As a frontend developer building a business module screen, I want a ready set of
 - Applied to update the FLO-003 route stubs (`/`, `/login`, not-found) to use `AppShellTemplate`/`AuthLayoutTemplate` instead of raw placeholder `div`s, proving the components compose into real layouts.
 
 **Excluded:**
+
 - Any business-specific component (e.g., a `CustomerCard` or `ChallanLineItemRow`) — those are built by their owning Phase 3 spec, composed from these atoms/molecules.
 - Real navigation items or role-based visibility logic (FLO-011) — `AppSidebar` takes a `role` prop and a nav-item list, both passed in stub/hardcoded form for now.
 - Dark mode (not required by the assignment; not in scope for this roadmap).

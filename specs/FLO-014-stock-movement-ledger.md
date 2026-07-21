@@ -3,6 +3,7 @@
 **Phase:** 3 — Core Business Modules
 
 **Status:**
+
 - [ ] Not Started
 - [ ] Completed
 
@@ -17,6 +18,7 @@ As a Warehouse or Accounts user, I want every stock change — in or out, and wh
 ## Scope
 
 **Included:**
+
 - Backend `StockMovementService.recordMovement({ productId, quantity, type: IN|OUT, reason, createdBy, sourceType?, sourceId? })`: inside a single Prisma transaction, creates the `StockMovement` row and atomically increments/decrements `Product.currentStock`; for `OUT` movements, enforces stock cannot go negative (throws a `ConflictError` if the requested quantity exceeds current stock) — this is the shared enforcement point FLO-015's "stock should not go negative" and "insufficient stock returns a proper error" requirements are actually implemented against.
 - A manual-adjustment endpoint: `POST /products/:id/stock-movements` (reason required, e.g., "damaged goods", "stock count correction"), restricted to Warehouse/Admin, so the assignment's "IN or OUT" movement types are usable outside the challan/PO flows too (not every stock change traces back to a sale or purchase).
 - `GET /products/:id/stock-movements` (paginated, most-recent-first) — the log view itself, listing product, quantity changed, type, reason, created by, timestamp exactly as the assignment specifies.
@@ -24,7 +26,8 @@ As a Warehouse or Accounts user, I want every stock change — in or out, and wh
 - Frontend: a `StockMovementLog` organism (a read-only, paginated table — reusing `DataTable`/`Pagination` from FLO-009) embedded into `ProductDetailPage` (extending the page FLO-013 created) and a small manual-adjustment form/modal for Warehouse/Admin users.
 
 **Excluded:**
-- Any logic for *when* a movement should be recorded from a business event — FLO-015 and FLO-017 own deciding *that* a challan confirmation or PO receipt should call `recordMovement`; this spec only owns making that call safe, atomic, and correctly enforced once invoked.
+
+- Any logic for _when_ a movement should be recorded from a business event — FLO-015 and FLO-017 own deciding _that_ a challan confirmation or PO receipt should call `recordMovement`; this spec only owns making that call safe, atomic, and correctly enforced once invoked.
 - Editing or deleting past stock movements (an audit log is append-only by definition; corrections happen via a new offsetting movement with a clear reason, not by mutating history).
 
 ## Acceptance Criteria
