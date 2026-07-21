@@ -33,7 +33,7 @@ Formal validation and `.env` file conventions arrive in [FLO-018](../specs/FLO-0
 
 ## Database (Prisma + PostgreSQL)
 
-Schema lives in `prisma/schema.prisma`; Prisma CLI config (schema path, migrations path, seed command) lives in `prisma.config.ts`, per Prisma's current config-as-code convention.
+Schema is split by business domain under `prisma/schema/` (`base.prisma` holds the `generator`/`datasource` blocks; one file per domain — `user`, `customer`, `product`, `stock-movement`, `sales-challan`, `purchase-order` — Prisma merges them into one logical schema, and cross-file relations work without any import syntax). Prisma CLI config (schema path, migrations path, seed command) lives in `prisma.config.ts`, per Prisma's current config-as-code convention.
 
 - `npx prisma migrate dev --name <name>` (run from `backend/`) — create and apply a migration.
 - `npx prisma db seed` — run `prisma/seed.ts`.

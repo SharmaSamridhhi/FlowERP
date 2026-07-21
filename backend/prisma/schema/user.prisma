@@ -1,0 +1,24 @@
+enum Role {
+  ADMIN
+  SALES
+  WAREHOUSE
+  ACCOUNTS
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  customersCreated      Customer[]
+  customerFollowUps     CustomerFollowUp[]
+  stockMovementsCreated StockMovement[]
+  salesChallansCreated  SalesChallan[]
+  purchaseOrdersCreated PurchaseOrder[]
+
+  @@map("users")
+}
