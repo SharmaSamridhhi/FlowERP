@@ -46,7 +46,7 @@ The assignment leaves some technology choices open ("Express.js or NestJS", "Pos
 | [FLO-011](FLO-011-auth-rbac.md)                  | Authentication & Role-Based Access Control                | 3     | ✅ Completed   | FLO-004, FLO-007, FLO-008, FLO-009, FLO-010 |
 | [FLO-012](FLO-012-customer-crm.md)               | Customer CRM Module                                       | 3     | ✅ Completed   | FLO-011                                     |
 | [FLO-013](FLO-013-product-inventory-catalog.md)  | Product & Inventory Catalog Module                        | 3     | ✅ Completed   | FLO-011                                     |
-| [FLO-014](FLO-014-stock-movement-ledger.md)      | Stock Movement Ledger                                     | 3     | ⬜ Not Started | FLO-013                                     |
+| [FLO-014](FLO-014-stock-movement-ledger.md)      | Stock Movement Ledger                                     | 3     | ✅ Completed   | FLO-013                                     |
 | [FLO-015](FLO-015-sales-challan-backend.md)      | Sales Challan Module — Backend                            | 3     | ⬜ Not Started | FLO-012, FLO-013, FLO-014                   |
 | [FLO-016](FLO-016-sales-challan-frontend.md)     | Sales Challan Module — Frontend                           | 3     | ⬜ Not Started | FLO-015                                     |
 | [FLO-017](FLO-017-purchase-order.md)             | Purchase Order Module                                     | 3     | ⬜ Not Started | FLO-013, FLO-014                            |
