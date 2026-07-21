@@ -1,8 +1,12 @@
+import { AuthLayoutTemplate } from "../components/templates";
+
 function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
-      <p className="rounded-md bg-white px-4 py-2 text-slate-700 shadow">Login page placeholder.</p>
-    </div>
+    <AuthLayoutTemplate title="Log in to FlowERP">
+      <p className="text-center text-sm text-slate-500">
+        Login page placeholder — real form arrives with FLO-011.
+      </p>
+    </AuthLayoutTemplate>
   );
 }
 

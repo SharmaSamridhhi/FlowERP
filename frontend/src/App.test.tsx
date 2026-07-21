@@ -11,7 +11,8 @@ describe("App", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText("Home page placeholder.")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Dashboard" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Customers" })).toBeInTheDocument();
   });
 
   it("renders the not-found page for an unknown path", () => {

@@ -1,5 +1,28 @@
 @import "tailwindcss";
 
+/*
+ * Design tokens (FLO-009). Tailwind v4 uses CSS-first configuration via
+ * @theme instead of a tailwind.config.ts file — this is the v4-native
+ * equivalent of what FLO-009's spec describes as "Design tokens in
+ * tailwind.config.ts".
+ *
+ * Deliberately small: a brand color scale (semantic alias over a blue
+ * palette, so the brand color is a one-place edit later) plus the neutral
+ * palette, spacing, and typography scales Tailwind already ships by
+ * default and this project has no need to override yet. Status colors
+ * (Badge variants) use Tailwind's built-in green/amber/red/slate directly
+ * rather than inventing a parallel "status" token set.
+ */
+@theme {
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-900: #1e3a8a;
+}
+
 html,
 body,
 #root {

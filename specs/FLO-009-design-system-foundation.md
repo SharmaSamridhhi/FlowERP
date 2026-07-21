@@ -5,7 +5,7 @@
 **Status:**
 
 - [ ] Not Started
-- [ ] Completed
+- [x] Completed
 
 ## Description
 
@@ -63,3 +63,5 @@ FLO-003, FLO-005.
 - Storybook is deliberately skipped: it's a real tool with real value, but standing it up (config, build integration, CI wiring) is disproportionate overhead for a project this size within the roadmap's time economics. The dev-only `/dev/components` route gets ~80% of the "see every variant" benefit for a fraction of the setup cost — a pragmatic substitution, not a corner cut on the actual requirement (a working, reviewable component set).
 - `DataTable` is the single highest-leverage component in this spec: every list screen in Phase 3 (customers, products, challans, purchase orders) uses it. Invest real care in its column-config API now — a redesign mid-Phase-3 would ripple across four modules.
 - Keep components prop-driven and free of direct API calls — atoms/molecules/organisms/templates render what they're given; data-fetching belongs in the `pages/` layer built per Phase 3 module. This boundary is what keeps the design system reusable and independently testable.
+- "Design tokens in `tailwind.config.ts`" (as originally written) doesn't apply as-is: this project uses Tailwind v4 (see FLO-003), which uses CSS-first configuration via an `@theme` block instead of a JS config file. Tokens live in `frontend/src/index.css`.
+- The upward-only import direction is enforced by an ESLint `no-restricted-imports` rule (per-folder `files` overrides in `eslint.config.js`), not just code review — verified by deliberately introducing a violating import and confirming lint catches it.
