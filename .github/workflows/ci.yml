@@ -1,0 +1,53 @@
+name: CI
+
+# Verifies every PR and every push to main: lint, type-check, tests (with
+# coverage), and build. No deploy step here — see
+# specs/FLO-022-cd-automation.md for that; keeping CI (verify) and CD
+# (ship) separate is deliberate.
+#
+# Recommended: enable branch protection on `main` requiring this workflow
+# to pass before merging. That's a GitHub repository setting, not
+# something this file can configure — left for the user to turn on.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    env:
+      # backend's postinstall runs `prisma generate`, which loads
+      # prisma.config.ts and requires DATABASE_URL to be a syntactically
+      # valid value even though `generate` never actually connects to a
+      # database (only `migrate`/real queries do). No Postgres service
+      # container needed here — see specs/FLO-010-ci-pipeline.md's scope.
+      DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        # Also builds packages/shared (root's "prepare" script) and
+        # generates the backend's Prisma client (backend's "postinstall"
+        # script) — both required by the steps below.
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type-check
+        run: npm run type-check
+
+      - name: Test with coverage
+        run: npm run test:coverage
+
+      - name: Build
+        run: npm run build

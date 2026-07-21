@@ -5,7 +5,7 @@
 **Status:**
 
 - [ ] Not Started
-- [ ] Completed
+- [x] Completed
 
 ## Description
 
@@ -58,3 +58,5 @@ FLO-005, FLO-006.
 
 - No deploy step lives in this workflow — mixing CI (verify) and CD (ship) into one workflow file tends to create exactly the kind of coupling this roadmap's phased approach is designed to avoid. FLO-022 either extends this workflow with a gated deploy job or adds a second workflow file triggered only on `main`, decided at that point once real hosting targets (FLO-020) exist.
 - This spec's job runs against every Phase 3 PR from FLO-011 onward, which is precisely why it's sequenced in Phase 2 rather than Phase 4 — establishing the gate before feature work starts is what keeps quality from eroding across seven-plus business-module PRs.
+- A genuinely fresh checkout has no `backend/src/generated/prisma` (gitignored) and nothing was generating it — every local dev session up to this point had it because `prisma generate` was run once, manually, back in FLO-004, and just never needed regenerating since. This only surfaced by actually simulating CI locally (`act`, driven by a real Docker daemon) against a clean checkout, not from reading the code. Fixed by adding `"postinstall": "prisma generate"` to `backend/package.json`, which also fixes the same gap for any new developer's first `npm install`. Since `prisma generate` (unlike `migrate`) never connects to a database but still needs `DATABASE_URL` to be syntactically present to load `prisma.config.ts`, the workflow sets a job-level placeholder `DATABASE_URL` that's never actually connected to.
+- Verified locally end-to-end with `act` (a local GitHub Actions runner, using a real Docker daemon) rather than only `actionlint` — confirmed a full clean run passes, a lint violation fails the workflow at the right step, and a second run restores from the npm cache (`cache-hit=true`). This is stronger verification than reading the YAML, since `act` executes the actual workflow file against a real container, not a simulation of one.
