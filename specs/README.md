@@ -49,7 +49,7 @@ The assignment leaves some technology choices open ("Express.js or NestJS", "Pos
 | [FLO-014](FLO-014-stock-movement-ledger.md)      | Stock Movement Ledger                                     | 3     | ✅ Completed   | FLO-013                                     |
 | [FLO-015](FLO-015-sales-challan-backend.md)      | Sales Challan Module — Backend                            | 3     | ✅ Completed   | FLO-012, FLO-013, FLO-014                   |
 | [FLO-016](FLO-016-sales-challan-frontend.md)     | Sales Challan Module — Frontend                           | 3     | ✅ Completed   | FLO-015                                     |
-| [FLO-017](FLO-017-purchase-order.md)             | Purchase Order Module                                     | 3     | ⬜ Not Started | FLO-013, FLO-014                            |
+| [FLO-017](FLO-017-purchase-order.md)             | Purchase Order Module                                     | 3     | ✅ Completed   | FLO-013, FLO-014                            |
 | [FLO-018](FLO-018-env-config-secrets.md)         | Environment Configuration & Secrets Management            | 4     | ⬜ Not Started | FLO-002, FLO-003                            |
 | [FLO-019](FLO-019-docker-compose.md)             | Docker Containerization & Compose Orchestration           | 4     | ⬜ Not Started | FLO-002, FLO-003, FLO-004, FLO-018          |
 | [FLO-020](FLO-020-hosting-deployment.md)         | Hosting Deployment (Frontend, Backend, Database)          | 4     | ⬜ Not Started | FLO-018, FLO-019                            |

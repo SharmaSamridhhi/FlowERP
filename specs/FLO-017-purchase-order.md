@@ -5,7 +5,7 @@
 **Status:**
 
 - [ ] Not Started
-- [ ] Completed
+- [x] Completed
 
 ## Description
 
@@ -35,14 +35,14 @@ As a Warehouse or Admin user, I want to record a purchase order for incoming sto
 
 ## Acceptance Criteria
 
-- [ ] `POST /purchase-orders` creates a Draft PO with an auto-generated unique PO number, correct line-item snapshots, and no stock effect.
-- [ ] `PATCH /purchase-orders/:id` edits a Draft's line items/supplier name; is rejected on a Received/Cancelled PO.
-- [ ] `POST /purchase-orders/:id/receive` on a Draft: transitions to Received and increases stock for every line item via `StockMovementService`, atomically; on an already-Received/Cancelled PO, is rejected with a clear state-guard error.
-- [ ] `POST /purchase-orders/:id/cancel` on a Draft succeeds with no stock effect; on a Received PO, follows the documented reversal policy, including the explicitly-defined behavior for the edge case where reversal would drive a product's stock negative (must not silently create negative stock — must error clearly, consistent with FLO-014's core guarantee).
-- [ ] `GET /purchase-orders` supports status filtering and PO-number/supplier-name search, paginated per the FLO-008 envelope.
-- [ ] Role checks: a Sales/Accounts-authenticated request to create/receive/cancel a PO returns `403`; read access works for all roles.
-- [ ] Frontend: the PO builder correctly composes multi-line items with per-line unit cost and a computed total cost; the list/detail pages mirror FLO-016's UX conventions (status badges, role-conditional actions, confirmation dialog before a stock-affecting cancel).
-- [ ] Unit/integration tests cover: PO-number generation uniqueness under concurrency, the receive flow's stock effect, the cancel-after-receive edge case (including the negative-stock guard), and role enforcement.
+- [x] `POST /purchase-orders` creates a Draft PO with an auto-generated unique PO number, correct line-item snapshots, and no stock effect.
+- [x] `PATCH /purchase-orders/:id` edits a Draft's line items/supplier name; is rejected on a Received/Cancelled PO.
+- [x] `POST /purchase-orders/:id/receive` on a Draft: transitions to Received and increases stock for every line item via `StockMovementService`, atomically; on an already-Received/Cancelled PO, is rejected with a clear state-guard error.
+- [x] `POST /purchase-orders/:id/cancel` on a Draft succeeds with no stock effect; on a Received PO, follows the documented reversal policy, including the explicitly-defined behavior for the edge case where reversal would drive a product's stock negative (must not silently create negative stock — must error clearly, consistent with FLO-014's core guarantee).
+- [x] `GET /purchase-orders` supports status filtering and PO-number/supplier-name search, paginated per the FLO-008 envelope.
+- [x] Role checks: a Sales/Accounts-authenticated request to create/receive/cancel a PO returns `403`; read access works for all roles.
+- [x] Frontend: the PO builder correctly composes multi-line items with per-line unit cost and a computed total cost; the list/detail pages mirror FLO-016's UX conventions (status badges, role-conditional actions, confirmation dialog before a stock-affecting cancel).
+- [x] Unit/integration tests cover: PO-number generation uniqueness under concurrency, the receive flow's stock effect, the cancel-after-receive edge case (including the negative-stock guard), and role enforcement.
 
 ## Technical Tasks
 
@@ -62,3 +62,10 @@ FLO-013, FLO-014.
 - This module's biggest actual design risk is the cancel-after-receive-would-go-negative case — don't leave it undecided. The documented resolution (block the cancellation with a clear `409` explaining the product(s) that would go negative, rather than allowing negative stock or silently clamping to zero) must be written down here once decided and treated as this spec's answer to an assignment gap, the same way FLO-015 documents its own judgment calls.
 - Deliberately does not depend on FLO-012 (Customer module) since a PO has no customer relation — only on FLO-013/FLO-014 (Product + Stock Ledger), which is what actually lets this spec be implemented in parallel with FLO-015/FLO-016 once FLO-014 is merged, rather than strictly after the Sales Challan work.
 - If FLO-015 already exists by the time this spec is implemented, prefer reusing its challan-number generation and line-item-table UI patterns over reinventing them — but do not block this spec on FLO-015 being merged first if only FLO-013/FLO-014 are ready; the dependency list above is the real constraint, FLO-015 is a reuse opportunity, not a hard prerequisite.
+
+### Decisions made during implementation
+
+- **Cancel-after-receive negative-stock resolution (the module's core judgment call):** blocked with a `409`, never silently clamped or allowed to go negative. `cancelPurchaseOrder` pre-checks every line item's current stock against the quantity that would be reversed; if any would go negative, the whole cancel is rejected before any `recordMovement` call, with a structured `InsufficientStockItem[]` detail (reused from FLO-015/016 — same shape: `productId`, `productName`, `requestedQuantity`, `availableQuantity`) naming every offending product. `recordMovement`'s own atomic per-row `OUT` guard (FLO-014) remains the final race-safety net underneath this pre-check, exactly as `confirmChallan`'s insufficient-stock pre-check relies on it. Proven by a test that receives a PO, manually reduces the product's stock below the received quantity (simulating it being sold elsewhere via a challan), and asserts the cancel is rejected with the PO remaining Received and stock untouched.
+- **FLO-015's number-generation mechanism was extracted, not reimplemented**, per Technical Task #2: `backend/src/utils/document-number.ts` now holds the entity-agnostic `createWithUniqueDocumentNumber` (the retry-on-`P2002` loop) and `generateNextDocumentNumber` (the date-scoped-sequence read). `sales-challan.service.ts`'s `createChallan` was refactored to use it too — a net simplification, not a behavior change (its 23 existing tests still pass unchanged). `createPurchaseOrder` uses the same helper with prefix `PO-{year}-`.
+- **`usePurchaseOrderLineItems` is a close sibling of FLO-016's `useLineItems`, not a shared hook** — per Technical Task #5's explicit allowance. A PO line item carries a per-unit _cost_ entered by the user on each line (and editable via `setUnitCost`), not a _price_ snapshot looked up from the product; the two hooks' shapes only coincidentally overlap, and forcing one abstraction over both would have meant a generic "amount" field name that reads confusingly at both call sites.
+- **Receive has no insufficient-... failure mode to map onto the UI.** Unlike a challan confirm, an `IN` movement can't fail on a stock check, so `PurchaseOrderBuilderPage`'s "Save & Receive" needs no per-row error mapping — only the cancel-after-receive path (on `PurchaseOrderDetailPage`) can produce the structured stock-block error, shown the same way FLO-016 shows insufficient-stock: a dismissible alert box listing every affected product.

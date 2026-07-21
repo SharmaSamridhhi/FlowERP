@@ -13,6 +13,9 @@ import CustomersListPage from "./pages/customers/CustomersListPage";
 import ProductDetailPage from "./pages/products/ProductDetailPage";
 import ProductFormPage from "./pages/products/ProductFormPage";
 import ProductsListPage from "./pages/products/ProductsListPage";
+import PurchaseOrderBuilderPage from "./pages/purchase-orders/PurchaseOrderBuilderPage";
+import PurchaseOrderDetailPage from "./pages/purchase-orders/PurchaseOrderDetailPage";
+import PurchaseOrdersListPage from "./pages/purchase-orders/PurchaseOrdersListPage";
 import { AppLayout } from "./routing/AppLayout";
 import { ProtectedRoute } from "./routing/ProtectedRoute";
 
@@ -35,6 +38,10 @@ function App() {
           <Route path="/challans/new" element={<ChallanBuilderPage />} />
           <Route path="/challans/:id/edit" element={<ChallanBuilderPage />} />
           <Route path="/challans/:id" element={<ChallanDetailPage />} />
+          <Route path="/purchase-orders" element={<PurchaseOrdersListPage />} />
+          <Route path="/purchase-orders/new" element={<PurchaseOrderBuilderPage />} />
+          <Route path="/purchase-orders/:id/edit" element={<PurchaseOrderBuilderPage />} />
+          <Route path="/purchase-orders/:id" element={<PurchaseOrderDetailPage />} />
         </Route>
       </Route>
       {import.meta.env.DEV && <Route path="/dev/api-demo" element={<ApiDemoPage />} />}
