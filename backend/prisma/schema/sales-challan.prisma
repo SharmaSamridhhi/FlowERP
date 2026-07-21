@@ -1,0 +1,45 @@
+enum SalesChallanStatus {
+  DRAFT
+  CONFIRMED
+  CANCELLED
+}
+
+model SalesChallan {
+  id            String             @id @default(cuid())
+  challanNumber String             @unique
+  status        SalesChallanStatus @default(DRAFT)
+  totalQuantity Int                @default(0)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
+
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  items SalesChallanItem[]
+
+  @@index([challanNumber])
+  @@index([status])
+  @@map("sales_challans")
+}
+
+// Line items snapshot product name/SKU/price at add-time so a challan's
+// contents never change retroactively when the live product changes.
+model SalesChallanItem {
+  id                  String  @id @default(cuid())
+  productNameSnapshot String
+  productSkuSnapshot  String
+  unitPriceSnapshot   Decimal @db.Decimal(12, 2)
+  quantity            Int
+
+  challanId String
+  challan   SalesChallan @relation(fields: [challanId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([challanId])
+  @@map("sales_challan_items")
+}

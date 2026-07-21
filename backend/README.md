@@ -27,5 +27,19 @@ Requests flow one direction: `routes` → `controllers` → `services`.
 
 - `PORT` — port the server listens on. Defaults to `4000`.
 - `NODE_ENV` — `development` | `production` | `test`. Defaults to `development`.
+- `DATABASE_URL` — PostgreSQL connection string used by Prisma, e.g. `postgresql://<user>@localhost:5432/flowerp_dev?schema=public`. Read from `backend/.env` (gitignored — see `backend/.env` locally, or create one; there is no committed `.env.example` yet, that arrives in [FLO-018](../specs/FLO-018-env-config-secrets.md)).
 
 Formal validation and `.env` file conventions arrive in [FLO-018](../specs/FLO-018-env-config-secrets.md).
+
+## Database (Prisma + PostgreSQL)
+
+Schema is split by business domain under `prisma/schema/` (`base.prisma` holds the `generator`/`datasource` blocks; one file per domain — `user`, `customer`, `product`, `stock-movement`, `sales-challan`, `purchase-order` — Prisma merges them into one logical schema, and cross-file relations work without any import syntax). Prisma CLI config (schema path, migrations path, seed command) lives in `prisma.config.ts`, per Prisma's current config-as-code convention.
+
+- `npx prisma migrate dev --name <name>` (run from `backend/`) — create and apply a migration.
+- `npx prisma db seed` — run `prisma/seed.ts`.
+- `npx prisma generate` — regenerate the typed client into `src/generated/prisma` (gitignored; regenerated on install/migrate, not committed).
+- `npx prisma studio` — browse the local database.
+
+**Version note:** pinned to `prisma`/`@prisma/client` `6.19.3` rather than the current `7.x` latest, because Prisma 7 requires Node ≥22 and this project is pinned to Node 20.19.0 (see [FLO-001](../specs/FLO-001-monorepo-foundation.md)'s `.nvmrc`). 6.19.3 is the newest release supporting Node ≥18.18.
+
+Full entity model, relation/`onDelete` rationale, and the snapshot-on-line-items design are documented in [FLO-004](../specs/FLO-004-database-schema-foundation.md).

@@ -1,0 +1,19 @@
+model Product {
+  id                    String   @id @default(cuid())
+  name                  String
+  sku                   String   @unique
+  category              String
+  unitPrice             Decimal  @db.Decimal(12, 2)
+  currentStock          Int      @default(0)
+  minStockAlertQuantity Int      @default(0)
+  location              String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  stockMovements     StockMovement[]
+  salesChallanItems  SalesChallanItem[]
+  purchaseOrderItems PurchaseOrderItem[]
+
+  @@index([name])
+  @@map("products")
+}

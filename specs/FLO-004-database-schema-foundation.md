@@ -14,7 +14,7 @@ As a backend developer, I want the complete relational schema for the applicatio
 
 **Included:**
 - Prisma installed in `backend/`, connected to a local PostgreSQL instance via `DATABASE_URL`.
-- Prisma schema (`schema.prisma`) modeling:
+- Prisma schema, split by business domain under `prisma/schema/` (multi-file schema, stable as of the Prisma version this project uses — see Implementation Notes), modeling:
   - `User` (id, name, email, password hash, role enum: `ADMIN | SALES | WAREHOUSE | ACCOUNTS`, timestamps).
   - `Customer` (name, mobile, email, business name, GST number optional, type enum `RETAIL | WHOLESALE | DISTRIBUTOR`, address, status enum `LEAD | ACTIVE | INACTIVE`, follow-up date, notes, timestamps, `createdBy` relation to `User`).
   - `CustomerFollowUp` (customer relation, note text, author relation to `User`, timestamp) — models "add follow-up notes" as an append-only sub-resource rather than overwriting the customer's single `notes` field.
@@ -46,7 +46,7 @@ As a backend developer, I want the complete relational schema for the applicatio
 ## Technical Tasks
 
 1. Add Prisma + `@prisma/client` to `backend/`; run `prisma init`.
-2. Model each entity listed above in `schema.prisma`, including enums and relations.
+2. Model each entity listed above under `prisma/schema/` (one file per domain — `user`, `customer`, `product`, `stock-movement`, `sales-challan`, `purchase-order` — plus a `base.prisma` holding the `generator`/`datasource` blocks), including enums and relations. Cross-file model relations work without any import syntax; Prisma merges the folder into one logical schema.
 3. Decide and annotate `onDelete` behavior per relation (favor `Restrict` for anything that would silently orphan financial/audit data, e.g., don't let a `Product` with stock history be hard-deleted).
 4. Add the indexes called out in acceptance criteria.
 5. Generate and commit the initial migration (`prisma/migrations/...`).
@@ -63,3 +63,5 @@ FLO-001, FLO-002.
 - Snapshotting on challan/PO line items is a hard requirement from the assignment ("Challan should store product snapshot data, not only product ID") — do not model `SalesChallanItem`/`PurchaseOrderItem` as a bare foreign key to `Product` with no duplicated fields.
 - Money/price fields should use a `Decimal` (Prisma `Decimal` type / Postgres `numeric`), never a float, to avoid rounding errors in totals.
 - This spec intentionally does not create a `Supplier` model — Purchase Orders (FLO-017) use a plain `supplierName` text field per the scope decision recorded in [specs/README.md](README.md).
+- `prisma`/`@prisma/client` are pinned to `6.19.3`, not the `7.x` latest at implementation time, because Prisma 7 requires Node ≥22 while this project targets Node 20.19.0 per [FLO-001](FLO-001-monorepo-foundation.md)'s `.nvmrc`. Re-evaluate this pin if/when the project's Node baseline moves.
+- The schema is split into `prisma/schema/*.prisma` (one file per domain) rather than a single `schema.prisma`, using Prisma's multi-file schema support — a preview feature at one point in Prisma's history, stable with no flag required by the version pinned here. Verify this is still the CLI's default expectation before assuming it for a future Prisma upgrade.

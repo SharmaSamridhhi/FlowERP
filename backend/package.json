@@ -11,6 +11,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.3",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "morgan": "^1.11.0"
@@ -20,6 +21,8 @@
     "@types/express": "^5.0.6",
     "@types/morgan": "^1.9.10",
     "@types/node": "^20.19.43",
+    "dotenv": "^16.6.1",
+    "prisma": "^6.19.3",
     "tsx": "^4.23.1",
     "typescript": "^7.0.2"
   }

@@ -1,0 +1,32 @@
+enum StockMovementType {
+  IN
+  OUT
+}
+
+// Light-touch traceability, not a full polymorphic association: tells you
+// which module caused a movement without a join, without a table per source.
+enum StockMovementSource {
+  CHALLAN
+  PURCHASE_ORDER
+  MANUAL
+}
+
+model StockMovement {
+  id         String               @id @default(cuid())
+  quantity   Int
+  type       StockMovementType
+  reason     String
+  sourceType StockMovementSource?
+  sourceId   String?
+  createdAt  DateTime             @default(now())
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([productId])
+  @@index([createdAt])
+  @@map("stock_movements")
+}

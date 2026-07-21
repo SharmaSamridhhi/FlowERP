@@ -1,0 +1,42 @@
+enum PurchaseOrderStatus {
+  DRAFT
+  RECEIVED
+  CANCELLED
+}
+
+// No Supplier entity — supplierName is a plain field. See the scope
+// decision recorded in specs/README.md and specs/FLO-017-purchase-order.md.
+model PurchaseOrder {
+  id           String              @id @default(cuid())
+  poNumber     String              @unique
+  supplierName String
+  status       PurchaseOrderStatus @default(DRAFT)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  items PurchaseOrderItem[]
+
+  @@index([poNumber])
+  @@index([status])
+  @@map("purchase_orders")
+}
+
+model PurchaseOrderItem {
+  id                  String  @id @default(cuid())
+  productNameSnapshot String
+  productSkuSnapshot  String
+  unitCost            Decimal @db.Decimal(12, 2)
+  quantity            Int
+
+  purchaseOrderId String
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([purchaseOrderId])
+  @@map("purchase_order_items")
+}

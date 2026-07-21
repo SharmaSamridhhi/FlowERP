@@ -1,0 +1,14 @@
+// FlowERP data model, split by business domain across this folder.
+// See specs/FLO-004-database-schema-foundation.md for the design
+// rationale behind snapshotting, onDelete policies, and the
+// StockMovement source-tracing fields.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
