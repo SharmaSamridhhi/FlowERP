@@ -36,6 +36,7 @@ Before declaring a specification done:
 3. Run and pass linting.
 4. Run and pass formatting checks.
 5. Run and pass any other quality gate defined for the project (type-checking, build).
+6. Flip that spec's `**Status:**` checkbox from `Not Started` to `Completed` in its own file (`specs/FLO-XXX-*.md`), and update its row in the index table in [`specs/README.md`](../specs/README.md) to `✅ Completed`. Include this as part of the same branch/commit as the implementation, not a separate follow-up.
 
 Once all of the above pass, stop. Do not push, do not open a PR, do not merge. Ask the user to review the implementation.
 

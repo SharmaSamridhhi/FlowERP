@@ -2,6 +2,10 @@
 
 **Phase:** 1 — Project Foundation
 
+**Status:**
+- [ ] Not Started
+- [x] Completed
+
 ## Description
 
 Stand up the frontend application skeleton in the `frontend/` workspace: React + TypeScript via Vite, client-side routing, Tailwind CSS wired in, and a base folder structure that anticipates the Atomic Design layout FLO-009 will populate. This spec produces a running shell app (a layout with empty placeholder routes) — no design system components, no API integration, no auth — just a booting, routable, styled-capable React app.

@@ -2,6 +2,10 @@
 
 **Phase:** 3 — Core Business Modules
 
+**Status:**
+- [ ] Not Started
+- [ ] Completed
+
 ## Description
 
 Implement the stock movement log required by the assignment's Product and Inventory module as a standalone, reusable backend service plus its read-only frontend view. This is the single, atomic, auditable code path through which `Product.currentStock` is ever allowed to change — FLO-013 explicitly forbids direct mutation, and FLO-015 (Sales Challan) and FLO-017 (Purchase Order) both call into this service rather than touching `currentStock` themselves. Isolating it here, before either of those modules exists, is what lets both depend on one correct, tested implementation instead of each reimplementing stock arithmetic.

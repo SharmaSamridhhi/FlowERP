@@ -2,6 +2,10 @@
 
 **Phase:** 3 — Core Business Modules
 
+**Status:**
+- [ ] Not Started
+- [ ] Completed
+
 ## Description
 
 Implement a purchase order module covering the "purchase orders" entity named in the assignment's Business Context but never detailed with fields or flows. This spec deliberately mirrors the Sales Challan's shape (multi-line document, auto-numbered, Draft/lifecycle status, snapshot line items, stock-affecting on completion) but on the inbound side: receiving a PO increases stock via FLO-014's ledger, the inverse of a confirmed challan. Scope is kept intentionally lean — no supplier CRM — since the assignment gives no basis to size this module any larger than "the thing that explains where IN stock movements come from."

@@ -2,6 +2,10 @@
 
 **Phase:** 1 — Project Foundation
 
+**Status:**
+- [ ] Not Started
+- [x] Completed
+
 ## Description
 
 Introduce PostgreSQL and Prisma into the backend, and define the complete initial data model for the whole application in one place: users/roles, customers and follow-ups, products, stock movements, sales challans and their line items, and purchase orders and their line items. Defining the full schema now — even though most modules aren't built until Phase 3 — is what lets every later business spec proceed without ad hoc migrations that fight each other. This spec creates and migrates the schema; it does not build any API around it.

@@ -2,6 +2,10 @@
 
 **Phase:** 2 — Engineering Foundations (Good Practices I)
 
+**Status:**
+- [ ] Not Started
+- [ ] Completed
+
 ## Description
 
 Introduce Zod as the mandatory runtime validation layer on the backend, a request-validation middleware pattern that validates `body`/`query`/`params` against a Zod schema before a controller ever runs, a typed custom error hierarchy (`AppError` and subclasses like `NotFoundError`, `ValidationError`, `ConflictError`), and a single centralized Express error-handling middleware that turns any thrown error into a consistent JSON error response with the correct HTTP status code. Every Phase 3 route is built on top of this from its first commit.

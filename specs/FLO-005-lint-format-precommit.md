@@ -2,6 +2,10 @@
 
 **Phase:** 2 — Engineering Foundations (Good Practices I)
 
+**Status:**
+- [ ] Not Started
+- [ ] Completed
+
 ## Description
 
 Introduce ESLint and Prettier across all three workspaces (`backend`, `frontend`, `packages/shared`) with a shared base configuration, plus a Husky + lint-staged pre-commit hook so violations are caught before they enter history. This must land before Phase 3 feature work begins so every business-module commit from FLO-011 onward is already held to the standard, instead of being retrofitted later.

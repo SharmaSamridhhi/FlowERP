@@ -2,6 +2,10 @@
 
 **Phase:** 4 — Deployment & Release Readiness
 
+**Status:**
+- [ ] Not Started
+- [ ] Completed
+
 ## Description
 
 Assemble everything the assignment's Submission Requirements section asks for into a coherent, reviewable package: a comprehensive root README, a Postman collection (or equivalent API documentation), an architecture explanation, and an honest known-limitations section. This spec doesn't build anything new — it consolidates and writes up decisions and setup steps already made by every prior spec, so it depends on effectively all of Phase 3 plus the deployment specs being done.

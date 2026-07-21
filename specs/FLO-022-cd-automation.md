@@ -2,6 +2,10 @@
 
 **Phase:** 5 — Engineering Improvements (Good Practices II)
 
+**Status:**
+- [ ] Not Started
+- [ ] Completed
+
 ## Description
 
 Extend the FLO-010 CI workflow (or add a companion workflow) so that a merge to `main` automatically deploys the backend and frontend to the hosting targets FLO-020 already proved out manually. This directly satisfies the assignment's "GitHub Actions deployment" bonus point. It's placed in Phase 5 deliberately: manual deployment (FLO-020) already satisfies the assignment's actual deployment requirement, so automating the redeploy step is a safe-to-defer improvement, not a blocker for anything earlier.

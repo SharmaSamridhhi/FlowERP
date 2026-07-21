@@ -2,6 +2,10 @@
 
 **Phase:** 3 — Core Business Modules
 
+**Status:**
+- [ ] Not Started
+- [ ] Completed
+
 ## Description
 
 Implement the product side of the assignment's Product and Inventory module: product CRUD (add/edit — no delete, per the assignment's listed features) with all required fields, search/pagination/filtering, and a low-stock indicator. This spec deliberately does **not** include the stock movement log itself (that's FLO-014, built on top of the product catalog this spec establishes) — it owns the product entity's own data and screens.

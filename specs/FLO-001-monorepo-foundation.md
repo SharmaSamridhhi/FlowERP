@@ -2,6 +2,10 @@
 
 **Phase:** 1 — Project Foundation
 
+**Status:**
+- [ ] Not Started
+- [x] Completed
+
 ## Description
 
 Establish the repository's top-level structure before any application code exists: the npm workspace layout that will hold the backend, frontend, and shared packages, root-level tooling config, Node version pinning, and the baseline conventions (folder naming, `.gitignore`, editor config) every later spec builds on. This spec produces no running application — it produces the skeleton and rules that make every subsequent spec's location and setup unambiguous.

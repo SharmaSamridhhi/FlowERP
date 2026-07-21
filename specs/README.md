@@ -31,32 +31,32 @@ The assignment leaves some technology choices open ("Express.js or NestJS", "Pos
 
 ## Spec index and dependency graph
 
-| ID | Title | Phase | Depends on |
-|---|---|---|---|
-| [FLO-001](FLO-001-monorepo-foundation.md) | Monorepo Structure & Repository Conventions | 1 | None |
-| [FLO-002](FLO-002-backend-bootstrap.md) | Backend Service Bootstrap | 1 | FLO-001 |
-| [FLO-003](FLO-003-frontend-bootstrap.md) | Frontend Application Bootstrap | 1 | FLO-001 |
-| [FLO-004](FLO-004-database-schema-foundation.md) | Database Schema & ORM Migration Foundation | 1 | FLO-001, FLO-002 |
-| [FLO-005](FLO-005-lint-format-precommit.md) | Linting, Formatting & Pre-Commit Standards | 2 | FLO-002, FLO-003 |
-| [FLO-006](FLO-006-testing-infrastructure.md) | Testing Infrastructure & Conventions | 2 | FLO-002, FLO-003, FLO-005 |
-| [FLO-007](FLO-007-validation-error-handling.md) | Runtime Validation & Centralized Error Handling | 2 | FLO-002, FLO-004 |
-| [FLO-008](FLO-008-shared-contracts.md) | Shared API Contracts, Response Envelope & Query Utilities | 2 | FLO-002, FLO-003, FLO-007 |
-| [FLO-009](FLO-009-design-system-foundation.md) | Frontend Design System Foundation (Atomic Design) | 2 | FLO-003, FLO-005 |
-| [FLO-010](FLO-010-ci-pipeline.md) | Continuous Integration Pipeline | 2 | FLO-005, FLO-006 |
-| [FLO-011](FLO-011-auth-rbac.md) | Authentication & Role-Based Access Control | 3 | FLO-004, FLO-007, FLO-008, FLO-009, FLO-010 |
-| [FLO-012](FLO-012-customer-crm.md) | Customer CRM Module | 3 | FLO-011 |
-| [FLO-013](FLO-013-product-inventory-catalog.md) | Product & Inventory Catalog Module | 3 | FLO-011 |
-| [FLO-014](FLO-014-stock-movement-ledger.md) | Stock Movement Ledger | 3 | FLO-013 |
-| [FLO-015](FLO-015-sales-challan-backend.md) | Sales Challan Module — Backend | 3 | FLO-012, FLO-013, FLO-014 |
-| [FLO-016](FLO-016-sales-challan-frontend.md) | Sales Challan Module — Frontend | 3 | FLO-015 |
-| [FLO-017](FLO-017-purchase-order.md) | Purchase Order Module | 3 | FLO-013, FLO-014 |
-| [FLO-018](FLO-018-env-config-secrets.md) | Environment Configuration & Secrets Management | 4 | FLO-002, FLO-003 |
-| [FLO-019](FLO-019-docker-compose.md) | Docker Containerization & Compose Orchestration | 4 | FLO-002, FLO-003, FLO-004, FLO-018 |
-| [FLO-020](FLO-020-hosting-deployment.md) | Hosting Deployment (Frontend, Backend, Database) | 4 | FLO-018, FLO-019 |
-| [FLO-021](FLO-021-documentation-submission.md) | Documentation & Submission Package | 4 | FLO-011–FLO-017, FLO-019, FLO-020 |
-| [FLO-022](FLO-022-cd-automation.md) | Automated CD via GitHub Actions | 5 | FLO-010, FLO-020 |
-| [FLO-023](FLO-023-invoice-pdf-export.md) | Invoice Generation & PDF Export | 5 | FLO-015, FLO-016 |
-| [FLO-024](FLO-024-product-image-s3.md) | Product Image Upload to AWS S3 | 5 | FLO-013, FLO-018 |
+| ID | Title | Phase | Status | Depends on |
+|---|---|---|---|---|
+| [FLO-001](FLO-001-monorepo-foundation.md) | Monorepo Structure & Repository Conventions | 1 | ✅ Completed | None |
+| [FLO-002](FLO-002-backend-bootstrap.md) | Backend Service Bootstrap | 1 | ✅ Completed | FLO-001 |
+| [FLO-003](FLO-003-frontend-bootstrap.md) | Frontend Application Bootstrap | 1 | ✅ Completed | FLO-001 |
+| [FLO-004](FLO-004-database-schema-foundation.md) | Database Schema & ORM Migration Foundation | 1 | ✅ Completed | FLO-001, FLO-002 |
+| [FLO-005](FLO-005-lint-format-precommit.md) | Linting, Formatting & Pre-Commit Standards | 2 | ⬜ Not Started | FLO-002, FLO-003 |
+| [FLO-006](FLO-006-testing-infrastructure.md) | Testing Infrastructure & Conventions | 2 | ⬜ Not Started | FLO-002, FLO-003, FLO-005 |
+| [FLO-007](FLO-007-validation-error-handling.md) | Runtime Validation & Centralized Error Handling | 2 | ⬜ Not Started | FLO-002, FLO-004 |
+| [FLO-008](FLO-008-shared-contracts.md) | Shared API Contracts, Response Envelope & Query Utilities | 2 | ⬜ Not Started | FLO-002, FLO-003, FLO-007 |
+| [FLO-009](FLO-009-design-system-foundation.md) | Frontend Design System Foundation (Atomic Design) | 2 | ⬜ Not Started | FLO-003, FLO-005 |
+| [FLO-010](FLO-010-ci-pipeline.md) | Continuous Integration Pipeline | 2 | ⬜ Not Started | FLO-005, FLO-006 |
+| [FLO-011](FLO-011-auth-rbac.md) | Authentication & Role-Based Access Control | 3 | ⬜ Not Started | FLO-004, FLO-007, FLO-008, FLO-009, FLO-010 |
+| [FLO-012](FLO-012-customer-crm.md) | Customer CRM Module | 3 | ⬜ Not Started | FLO-011 |
+| [FLO-013](FLO-013-product-inventory-catalog.md) | Product & Inventory Catalog Module | 3 | ⬜ Not Started | FLO-011 |
+| [FLO-014](FLO-014-stock-movement-ledger.md) | Stock Movement Ledger | 3 | ⬜ Not Started | FLO-013 |
+| [FLO-015](FLO-015-sales-challan-backend.md) | Sales Challan Module — Backend | 3 | ⬜ Not Started | FLO-012, FLO-013, FLO-014 |
+| [FLO-016](FLO-016-sales-challan-frontend.md) | Sales Challan Module — Frontend | 3 | ⬜ Not Started | FLO-015 |
+| [FLO-017](FLO-017-purchase-order.md) | Purchase Order Module | 3 | ⬜ Not Started | FLO-013, FLO-014 |
+| [FLO-018](FLO-018-env-config-secrets.md) | Environment Configuration & Secrets Management | 4 | ⬜ Not Started | FLO-002, FLO-003 |
+| [FLO-019](FLO-019-docker-compose.md) | Docker Containerization & Compose Orchestration | 4 | ⬜ Not Started | FLO-002, FLO-003, FLO-004, FLO-018 |
+| [FLO-020](FLO-020-hosting-deployment.md) | Hosting Deployment (Frontend, Backend, Database) | 4 | ⬜ Not Started | FLO-018, FLO-019 |
+| [FLO-021](FLO-021-documentation-submission.md) | Documentation & Submission Package | 4 | ⬜ Not Started | FLO-011–FLO-017, FLO-019, FLO-020 |
+| [FLO-022](FLO-022-cd-automation.md) | Automated CD via GitHub Actions | 5 | ⬜ Not Started | FLO-010, FLO-020 |
+| [FLO-023](FLO-023-invoice-pdf-export.md) | Invoice Generation & PDF Export | 5 | ⬜ Not Started | FLO-015, FLO-016 |
+| [FLO-024](FLO-024-product-image-s3.md) | Product Image Upload to AWS S3 | 5 | ⬜ Not Started | FLO-013, FLO-018 |
 
 ## Coverage check against the assignment
 

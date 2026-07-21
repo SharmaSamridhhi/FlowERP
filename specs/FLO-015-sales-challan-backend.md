@@ -2,6 +2,10 @@
 
 **Phase:** 3 — Core Business Modules
 
+**Status:**
+- [ ] Not Started
+- [ ] Completed
+
 ## Description
 
 Implement the backend for the assignment's Sales Challan module: multi-line challan creation, auto-generated challan numbers, Draft/Confirmed/Cancelled lifecycle, product-snapshot line items, and the stock-deduction business rule enforced through FLO-014's `StockMovementService`. This is the most business-logic-dense module in the assignment and is split from its frontend (FLO-016) because the transactional correctness here — confirm-time stock deduction, snapshotting, negative-stock rejection — deserves focused implementation and testing before any UI is built against it.

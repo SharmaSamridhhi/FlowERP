@@ -2,6 +2,10 @@
 
 **Phase:** 5 — Engineering Improvements (Good Practices II)
 
+**Status:**
+- [ ] Not Started
+- [ ] Completed
+
 ## Description
 
 Implement the assignment's "Upload product image to AWS S3" bonus point: an image field on products, uploaded from `ProductFormPage`/`ProductDetailPage`, stored in an S3 bucket, with the resulting URL persisted on the product record. Placed in Phase 5 because the Product & Inventory module (FLO-013) is fully functional without it, and image upload introduces a new external dependency (AWS credentials, a bucket) that's reasonable to defer until the core catalog is proven.

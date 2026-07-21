@@ -2,6 +2,10 @@
 
 **Phase:** 2 — Engineering Foundations (Good Practices I)
 
+**Status:**
+- [ ] Not Started
+- [ ] Completed
+
 ## Description
 
 Add a GitHub Actions workflow that runs on every push/PR: install dependencies, lint, type-check, run tests with coverage, and build both `backend` and `frontend`. This is the automated quality gate that watches every Phase 3 PR from the very first one (FLO-011 onward) — required per project instructions to be treated as a first-class practice from the beginning, not bolted on once features exist. CD (actually deploying) is explicitly out of scope here — see FLO-022.

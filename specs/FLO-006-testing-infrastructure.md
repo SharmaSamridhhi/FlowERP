@@ -2,6 +2,10 @@
 
 **Phase:** 2 — Engineering Foundations (Good Practices I)
 
+**Status:**
+- [ ] Not Started
+- [ ] Completed
+
 ## Description
 
 Establish the unit/integration testing stack for both `backend` and `frontend` — Vitest as the common test runner, Supertest for backend HTTP-level tests, React Testing Library for frontend component tests — plus coverage thresholds and one real example test per package proving the pipeline works end-to-end. Landing this before Phase 3 means every business-module spec writes tests against an already-working harness instead of configuring test tooling ad hoc mid-feature.
