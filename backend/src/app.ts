@@ -11,10 +11,22 @@ import validationDemoRoute from "./routes/internal/validation-demo.route.js";
 import productsRoute from "./routes/products.route.js";
 import purchaseOrdersRoute from "./routes/purchase-orders.route.js";
 import salesChallansRoute from "./routes/sales-challans.route.js";
+import { ForbiddenError } from "./utils/errors.js";
 
 const app: Express = express();
 
-app.use(cors({ origin: true }));
+app.use(
+  cors({
+    origin(origin, callback) {
+      // No Origin header (same-origin requests, curl, server-to-server) — allow.
+      if (!origin || origin === env.corsOrigin) {
+        callback(null, true);
+        return;
+      }
+      callback(new ForbiddenError("Origin not allowed by CORS policy"));
+    },
+  }),
+);
 app.use(express.json());
 
 if (env.nodeEnv !== "test") {
