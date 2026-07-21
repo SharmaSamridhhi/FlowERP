@@ -5,7 +5,7 @@
 **Status:**
 
 - [ ] Not Started
-- [ ] Completed
+- [x] Completed
 
 ## Description
 
@@ -34,15 +34,15 @@ As a Warehouse or Admin user, I want to add and edit products with their pricing
 
 ## Acceptance Criteria
 
-- [ ] `POST /products` creates a product with all required fields and returns `201`; a duplicate SKU returns `409 Conflict` via the FLO-007 error pattern.
-- [ ] `GET /products?search=...` matches name/SKU; `GET /products?category=...` and `GET /products?lowStock=true` filter correctly; results are paginated per the FLO-008 envelope.
-- [ ] `GET /products/:id` returns full product detail including the computed `isLowStock` field.
-- [ ] `PATCH /products/:id` updates editable fields (name, category, unit price, minimum stock alert quantity, location) but rejects (or silently ignores, documented choice either way) any attempt to set `currentStock` directly through this endpoint.
-- [ ] A user whose role isn't permitted to create/edit products receives `403`, per the documented role matrix.
-- [ ] Frontend list page: search, category filter, and "low stock only" filter all work against the live backend; low-stock rows are visually distinguished (e.g., a warning `Badge`).
-- [ ] Frontend add/edit form: validates required fields and numeric constraints (e.g., unit price ≥ 0, minimum stock alert quantity ≥ 0) client-side before submission, mirroring the shared Zod schema.
-- [ ] Frontend detail page displays all fields correctly, including a clear low-stock warning when applicable.
-- [ ] Unit/integration tests cover: backend service search/filter composition, the `currentStock` immutability guard on `PATCH`, uniqueness-conflict handling, route-level role enforcement, and frontend form validation + list filtering states.
+- [x] `POST /products` creates a product with all required fields and returns `201`; a duplicate SKU returns `409 Conflict` via the FLO-007 error pattern.
+- [x] `GET /products?search=...` matches name/SKU; `GET /products?category=...` and `GET /products?lowStock=true` filter correctly; results are paginated per the FLO-008 envelope.
+- [x] `GET /products/:id` returns full product detail including the computed `isLowStock` field.
+- [x] `PATCH /products/:id` updates editable fields (name, category, unit price, minimum stock alert quantity, location) but rejects (or silently ignores, documented choice either way) any attempt to set `currentStock` directly through this endpoint.
+- [x] A user whose role isn't permitted to create/edit products receives `403`, per the documented role matrix.
+- [x] Frontend list page: search, category filter, and "low stock only" filter all work against the live backend; low-stock rows are visually distinguished (e.g., a warning `Badge`).
+- [x] Frontend add/edit form: validates required fields and numeric constraints (e.g., unit price ≥ 0, minimum stock alert quantity ≥ 0) client-side before submission, mirroring the shared Zod schema.
+- [x] Frontend detail page displays all fields correctly, including a clear low-stock warning when applicable.
+- [x] Unit/integration tests cover: backend service search/filter composition, the `currentStock` immutability guard on `PATCH`, uniqueness-conflict handling, route-level role enforcement, and frontend form validation + list filtering states.
 
 ## Technical Tasks
 
@@ -62,3 +62,7 @@ FLO-011.
 - The hard boundary — no endpoint in this spec ever mutates `currentStock` — is the single most important architectural decision in this module. It's what makes FLO-014's stock ledger the sole source of truth for stock changes, which in turn is what makes the Sales Challan (FLO-015) and Purchase Order (FLO-017) stock effects auditable and consistent instead of two different modules independently poking the same counter.
 - `currentStock` still lives on the `Product` row (per FLO-004's schema) as a denormalized running total for fast reads (list/detail pages shouldn't have to sum the entire movement ledger on every request) — FLO-014 is responsible for keeping it consistent with the ledger, atomically, whenever a movement is recorded.
 - Follow FLO-012's precedent for form library, query-state approach, and role-matrix documentation format so the codebase reads as one system, not four independently-styled modules.
+- **Role matrix:** all four roles (Admin, Sales, Warehouse, Accounts) can read (`GET`); only Admin and Warehouse can create or edit (`POST`/`PATCH`), since the warehouse team owns day-to-day catalog upkeep and admin oversees it. Sales and Accounts need read access for order/invoice context but have no reason to edit the catalog. Enforced via `authorize("ADMIN", "WAREHOUSE")` on the write routes only, in `backend/src/routes/products.route.ts`.
+- **Low-stock filter:** Prisma has no fluent way to compare two columns of the same row (`currentStock` vs. `minStockAlertQuantity`) in a `where` clause. `GET /products?lowStock=true` resolves this with one raw `$queryRaw` selecting just the matching `id`s, then composes that id list into the normal Prisma `where` alongside `search`/`category` so pagination and `total` count stay correct — see `backend/src/services/product.service.ts`.
+- `category` is a free-text field (per FLO-004's schema, not an enum like Customer's `type`/`status`), so both the filter query param and the frontend's category input use case-insensitive partial matching, consistent with `search`.
+- The product form's `<form>` needs `noValidate`: the `Unit price`/`Minimum stock alert quantity` inputs use HTML `min="0"`, and without `noValidate` the browser's native constraint validation silently blocks submission (no submit event at all) before React/Zod ever runs, showing a native tooltip instead of the app's styled error message. `CustomerFormPage` never hit this because it has no numeric-constrained inputs.
