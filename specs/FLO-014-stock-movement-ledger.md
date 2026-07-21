@@ -5,7 +5,7 @@
 **Status:**
 
 - [ ] Not Started
-- [ ] Completed
+- [x] Completed
 
 ## Description
 
@@ -32,14 +32,14 @@ As a Warehouse or Accounts user, I want every stock change — in or out, and wh
 
 ## Acceptance Criteria
 
-- [ ] `recordMovement` with an `IN` type always succeeds (given a valid product) and increases `Product.currentStock` by the exact quantity, with a corresponding `StockMovement` row created in the same transaction.
-- [ ] `recordMovement` with an `OUT` type that would take `currentStock` below zero throws a `ConflictError` (`409`), and neither the `Product.currentStock` nor a `StockMovement` row is modified/created — verified with a test asserting no partial state change (transaction rollback works).
-- [ ] `recordMovement` with an `OUT` type within available stock succeeds and decreases `currentStock` by the exact quantity.
-- [ ] Two concurrent `OUT` movements against the same product that would together exceed available stock cannot both succeed (only one succeeds, the other receives the insufficient-stock error) — verified with a test that issues them concurrently, proving the transaction actually serializes/guards correctly rather than racing.
-- [ ] `POST /products/:id/stock-movements` (manual adjustment) is rejected with `403` for roles outside the documented allowed set, and requires a non-empty `reason`.
-- [ ] `GET /products/:id/stock-movements` returns entries ordered most-recent-first, paginated per the FLO-008 envelope, with all required fields (product, quantity changed, type, reason, created by, timestamp) present.
-- [ ] Frontend: `ProductDetailPage` shows the movement log with correct pagination; the manual-adjustment form is visible only to permitted roles and a successful submission refreshes the log without a full page reload.
-- [ ] Unit tests directly exercise `StockMovementService.recordMovement`'s transactional and negative-stock-guard behavior in isolation (not only through the manual-adjustment HTTP endpoint), since FLO-015/FLO-017 will call this service directly, not through HTTP.
+- [x] `recordMovement` with an `IN` type always succeeds (given a valid product) and increases `Product.currentStock` by the exact quantity, with a corresponding `StockMovement` row created in the same transaction.
+- [x] `recordMovement` with an `OUT` type that would take `currentStock` below zero throws a `ConflictError` (`409`), and neither the `Product.currentStock` nor a `StockMovement` row is modified/created — verified with a test asserting no partial state change (transaction rollback works).
+- [x] `recordMovement` with an `OUT` type within available stock succeeds and decreases `currentStock` by the exact quantity.
+- [x] Two concurrent `OUT` movements against the same product that would together exceed available stock cannot both succeed (only one succeeds, the other receives the insufficient-stock error) — verified with a test that issues them concurrently, proving the transaction actually serializes/guards correctly rather than racing.
+- [x] `POST /products/:id/stock-movements` (manual adjustment) is rejected with `403` for roles outside the documented allowed set, and requires a non-empty `reason`.
+- [x] `GET /products/:id/stock-movements` returns entries ordered most-recent-first, paginated per the FLO-008 envelope, with all required fields (product, quantity changed, type, reason, created by, timestamp) present.
+- [x] Frontend: `ProductDetailPage` shows the movement log with correct pagination; the manual-adjustment form is visible only to permitted roles and a successful submission refreshes the log without a full page reload.
+- [x] Unit tests directly exercise `StockMovementService.recordMovement`'s transactional and negative-stock-guard behavior in isolation (not only through the manual-adjustment HTTP endpoint), since FLO-015/FLO-017 will call this service directly, not through HTTP.
 
 ## Technical Tasks
 
@@ -59,3 +59,4 @@ FLO-013.
 - This is the module where correctness matters most in the entire backend: two other modules' core business rules ("stock should not go negative," "if stock is insufficient, API should return a proper error") are only as correct as this service's transaction handling. Prioritize the concurrency test over anything else in this spec's acceptance criteria if time-constrained.
 - `sourceType`/`sourceId` (from FLO-004's schema) get populated by callers — FLO-015 passes `sourceType: "CHALLAN", sourceId: challan.id`; FLO-017 passes `sourceType: "PURCHASE_ORDER", sourceId: po.id`; the manual-adjustment endpoint in this spec passes `sourceType: "MANUAL", sourceId: null`. Keep `recordMovement`'s signature accepting these as optional parameters now so FLO-015/017 don't need to modify this service later — they only need to call it correctly.
 - Exposed as a service method (not only reachable via this spec's own HTTP endpoint) specifically so FLO-015 and FLO-017 import and call `StockMovementService` directly from within their own request-handling transactions, rather than making an internal HTTP call to this module — keep it a plain importable service class/function, not something that assumes it's always invoked over HTTP.
+- **How the negative-stock guard is actually race-free:** `recordMovement` does not read `currentStock` and then conditionally write — that read-then-write shape is exactly what a race condition needs. Instead it issues one atomic `Product.updateMany({ where: { id, currentStock: { gte: quantity } }, data: { currentStock: { increment: delta } } })` inside the transaction. Postgres locks and evaluates that `WHERE` clause at the row level, so two concurrent `OUT`s against the same row genuinely serialize (the second's `WHERE` is re-checked against the first's already-committed result) rather than both reading a stale value. `updateMany`'s returned `count` (0 vs. 1) is what distinguishes "insufficient stock" from "product not found." No `SERIALIZABLE` isolation level or raw SQL was needed — this is a plain Prisma call. See `backend/src/services/stock-movement.service.ts`.

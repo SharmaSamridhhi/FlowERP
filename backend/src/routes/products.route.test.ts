@@ -45,6 +45,11 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  // StockMovement -> Product is onDelete: Restrict, so movements must be
+  // cleared before their products.
+  await prisma.stockMovement.deleteMany({
+    where: { product: { sku: { startsWith: "ZZZ-TEST-" } } },
+  });
   await prisma.product.deleteMany({ where: { sku: { startsWith: "ZZZ-TEST-" } } });
   await prisma.user.deleteMany({ where: { email: { in: TEST_USERS.map((u) => u.email) } } });
   await prisma.$disconnect();
@@ -289,5 +294,98 @@ describe("PATCH /products/:id", () => {
       .send({ category: "Electronics" });
 
     expect(response.status).toBe(403);
+  });
+});
+
+describe("POST /products/:id/stock-movements", () => {
+  it("records a manual IN adjustment and updates currentStock", async () => {
+    const product = await createTestProduct({ name: "ZZZ-Test Manual IN" });
+
+    const response = await request(app)
+      .post(`/products/${product.id}/stock-movements`)
+      .set(authed("WAREHOUSE"))
+      .send({ quantity: 20, type: "IN", reason: "Stock count correction" });
+
+    expect(response.status).toBe(201);
+    expect(response.body.data).toMatchObject({
+      quantity: 20,
+      type: "IN",
+      reason: "Stock count correction",
+      sourceType: "MANUAL",
+    });
+
+    const detail = await request(app).get(`/products/${product.id}`).set(authed("ADMIN"));
+    expect(detail.body.data.currentStock).toBe(20);
+  });
+
+  it("returns 409 for an OUT adjustment that would take stock negative", async () => {
+    const product = await createTestProduct({ name: "ZZZ-Test Manual OUT Guard" });
+
+    const response = await request(app)
+      .post(`/products/${product.id}/stock-movements`)
+      .set(authed("ADMIN"))
+      .send({ quantity: 5, type: "OUT", reason: "Damaged goods" });
+
+    expect(response.status).toBe(409);
+  });
+
+  it("returns 400 when reason is missing", async () => {
+    const product = await createTestProduct({ name: "ZZZ-Test Missing Reason" });
+
+    const response = await request(app)
+      .post(`/products/${product.id}/stock-movements`)
+      .set(authed("ADMIN"))
+      .send({ quantity: 5, type: "IN" });
+
+    expect(response.status).toBe(400);
+  });
+
+  it.each(["SALES", "ACCOUNTS"])("returns 403 for %s", async (role) => {
+    const product = await createTestProduct({ name: "ZZZ-Test Manual Forbidden" });
+
+    const response = await request(app)
+      .post(`/products/${product.id}/stock-movements`)
+      .set(authed(role))
+      .send({ quantity: 5, type: "IN", reason: "Restock" });
+
+    expect(response.status).toBe(403);
+  });
+});
+
+describe("GET /products/:id/stock-movements", () => {
+  it("returns entries most-recent-first, paginated, with all required fields", async () => {
+    const product = await createTestProduct({ name: "ZZZ-Test Ledger List" });
+
+    await request(app)
+      .post(`/products/${product.id}/stock-movements`)
+      .set(authed("ADMIN"))
+      .send({ quantity: 10, type: "IN", reason: "Initial stock" });
+    await request(app)
+      .post(`/products/${product.id}/stock-movements`)
+      .set(authed("WAREHOUSE"))
+      .send({ quantity: 3, type: "OUT", reason: "Damaged goods" });
+
+    const response = await request(app)
+      .get(`/products/${product.id}/stock-movements`)
+      .set(authed("ACCOUNTS"));
+
+    expect(response.status).toBe(200);
+    expect(response.body.data).toHaveLength(2);
+    expect(response.body.data[0]).toMatchObject({
+      quantity: 3,
+      type: "OUT",
+      reason: "Damaged goods",
+    });
+    expect(response.body.data[0].createdByName).toBe("Product Test Warehouse");
+    expect(response.body.data[1]).toMatchObject({ quantity: 10, type: "IN" });
+    expect(response.body.meta.pagination).toMatchObject({ page: 1, limit: 20, total: 2 });
+  });
+
+  it("returns 404 for a non-existent product", async () => {
+    const response = await request(app)
+      .get("/products/does-not-exist/stock-movements")
+      .set(authed("ADMIN"));
+
+    expect(response.status).toBe(404);
   });
 });
