@@ -4,6 +4,9 @@ import ApiDemoPage from "./pages/internal/ApiDemoPage";
 import ComponentsPage from "./pages/internal/ComponentsPage";
 import LoginPage from "./pages/LoginPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import ChallanBuilderPage from "./pages/challans/ChallanBuilderPage";
+import ChallanDetailPage from "./pages/challans/ChallanDetailPage";
+import ChallansListPage from "./pages/challans/ChallansListPage";
 import CustomerDetailPage from "./pages/customers/CustomerDetailPage";
 import CustomerFormPage from "./pages/customers/CustomerFormPage";
 import CustomersListPage from "./pages/customers/CustomersListPage";
@@ -28,6 +31,10 @@ function App() {
           <Route path="/products/new" element={<ProductFormPage />} />
           <Route path="/products/:id/edit" element={<ProductFormPage />} />
           <Route path="/products/:id" element={<ProductDetailPage />} />
+          <Route path="/challans" element={<ChallansListPage />} />
+          <Route path="/challans/new" element={<ChallanBuilderPage />} />
+          <Route path="/challans/:id/edit" element={<ChallanBuilderPage />} />
+          <Route path="/challans/:id" element={<ChallanDetailPage />} />
         </Route>
       </Route>
       {import.meta.env.DEV && <Route path="/dev/api-demo" element={<ApiDemoPage />} />}

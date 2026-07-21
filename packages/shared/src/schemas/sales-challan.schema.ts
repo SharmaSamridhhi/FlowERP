@@ -68,3 +68,17 @@ export const SalesChallanWithItemsSchema = SalesChallanSchema.extend({
   items: z.array(SalesChallanItemSchema),
 });
 export type SalesChallanWithItems = z.infer<typeof SalesChallanWithItemsSchema>;
+
+// Shape of the `error.details` array on POST /challans/:id/confirm's 409
+// insufficient-stock response (see specs/FLO-016-sales-challan-frontend.md
+// — the builder maps this onto the specific offending line item(s)
+// instead of showing only a generic toast). Added alongside FLO-016
+// because FLO-015 threw a message-only ConflictError with no structured
+// detail for the frontend to key off of.
+export const InsufficientStockItemSchema = z.object({
+  productId: z.string(),
+  productName: z.string(),
+  requestedQuantity: z.number(),
+  availableQuantity: z.number(),
+});
+export type InsufficientStockItem = z.infer<typeof InsufficientStockItemSchema>;
