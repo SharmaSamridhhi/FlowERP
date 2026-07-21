@@ -5,7 +5,7 @@
 **Status:**
 
 - [ ] Not Started
-- [ ] Completed
+- [x] Completed
 
 ## Description
 
@@ -34,16 +34,16 @@ As a Sales user, I want to create, edit, search, and view customers, including l
 
 ## Acceptance Criteria
 
-- [ ] `POST /customers` with valid data creates a customer and returns `201`; missing required fields return `400` with field-level errors; an invalid `type`/`status` enum value is rejected.
-- [ ] `GET /customers?search=...` matches against name, mobile, email, and business name (case-insensitive partial match); `GET /customers?type=WHOLESALE&status=ACTIVE` filters correctly; results are paginated per the FLO-008 envelope.
-- [ ] `GET /customers/:id` returns full customer detail including an ordered (most-recent-first) list of follow-up notes; a non-existent id returns `404`.
-- [ ] `PATCH /customers/:id` updates only provided fields; a partial update doesn't clobber unspecified fields.
-- [ ] `POST /customers/:id/follow-ups` appends a note attributed to the authenticated user with a timestamp, and does not overwrite prior notes.
-- [ ] A user whose role isn't permitted to create/edit customers receives `403` on those endpoints, per the documented role matrix; read access works for all roles per that same matrix.
-- [ ] Frontend list page: searching, filtering by type/status, and paginating all work against the live backend, with the URL/query state reflecting the current search+filter+page (so a refresh doesn't lose context) — or, at minimum, in-memory state that behaves correctly across a session if URL-syncing is deferred; either choice must be documented.
-- [ ] Frontend add/edit form: client-side validation errors surface per-field before submission; a successful submit navigates to the customer's detail page and shows a success toast; a server-side validation error (e.g., a race-condition duplicate) surfaces clearly, not as a silent failure.
-- [ ] Frontend detail page: displays all customer fields and the full follow-up history; submitting a new follow-up note appends it to the list without a full page reload.
-- [ ] Unit/integration tests cover: backend service logic (search/filter query composition, follow-up append), backend route auth (403 for disallowed roles), and frontend form validation + list rendering states.
+- [x] `POST /customers` with valid data creates a customer and returns `201`; missing required fields return `400` with field-level errors; an invalid `type`/`status` enum value is rejected.
+- [x] `GET /customers?search=...` matches against name, mobile, email, and business name (case-insensitive partial match); `GET /customers?type=WHOLESALE&status=ACTIVE` filters correctly; results are paginated per the FLO-008 envelope.
+- [x] `GET /customers/:id` returns full customer detail including an ordered (most-recent-first) list of follow-up notes; a non-existent id returns `404`.
+- [x] `PATCH /customers/:id` updates only provided fields; a partial update doesn't clobber unspecified fields.
+- [x] `POST /customers/:id/follow-ups` appends a note attributed to the authenticated user with a timestamp, and does not overwrite prior notes.
+- [x] A user whose role isn't permitted to create/edit customers receives `403` on those endpoints, per the documented role matrix; read access works for all roles per that same matrix.
+- [x] Frontend list page: searching, filtering by type/status, and paginating all work against the live backend, with the URL/query state reflecting the current search+filter+page (so a refresh doesn't lose context) — or, at minimum, in-memory state that behaves correctly across a session if URL-syncing is deferred; either choice must be documented.
+- [x] Frontend add/edit form: client-side validation errors surface per-field before submission; a successful submit navigates to the customer's detail page and shows a success toast; a server-side validation error (e.g., a race-condition duplicate) surfaces clearly, not as a silent failure.
+- [x] Frontend detail page: displays all customer fields and the full follow-up history; submitting a new follow-up note appends it to the list without a full page reload.
+- [x] Unit/integration tests cover: backend service logic (search/filter query composition, follow-up append), backend route auth (403 for disallowed roles), and frontend form validation + list rendering states.
 
 ## Technical Tasks
 
@@ -62,6 +62,10 @@ FLO-011.
 
 ## Implementation Notes
 
-- This spec makes the concrete choice of form-handling approach for the whole frontend going forward (e.g., `react-hook-form` with a Zod resolver is the natural fit given the shared-schema architecture from FLO-008) — pick it here, document the choice, and every later frontend spec (FLO-013, FLO-016, FLO-017) follows it rather than re-deciding.
-- Follow-up notes are modeled as an append-only sub-resource (FLO-004's `CustomerFollowUp` table), not as overwrites to a single `notes` string, so history is preserved — the assignment's plain "Notes" field on the customer can still exist for a general/free-text field, distinct from the timestamped follow-up log.
-- Whichever role matrix is chosen here, write it down explicitly (a small table in this file or a shared `ROLES.md`) — FLO-013/015/017 will each need to make an analogous call and should be able to point at this precedent instead of re-litigating role philosophy from scratch.
+- **Form library:** `react-hook-form` v7 + `@hookform/resolvers`' `zodResolver`, wired directly to the same schemas in `packages/shared` used for the backend request validation — no duplicate validation logic. Precedent for FLO-013/015/017: call `useForm({ resolver: zodResolver(Schema), defaultValues: {...} })` **without** an explicit generic type parameter — let TypeScript infer `TFieldValues` from the resolver so the submit handler's data type lines up with the schema's output type automatically.
+- **Role matrix:** all four roles (Admin, Sales, Warehouse, Accounts) can read (`GET`); only Admin and Sales can create, edit, or add follow-ups (`POST`/`PATCH`). Warehouse and Accounts need read access for order/invoice context but have no reason to edit customer records. Enforced via `authorize("ADMIN", "SALES")` on the write routes only, in `backend/src/routes/customers.route.ts`. Later modules (FLO-013/015/017) should default to this same shape unless there's a concrete reason to diverge.
+- Follow-up notes are modeled as an append-only sub-resource (`CustomerFollowUp` table, via a Prisma `$transaction` that also updates the customer's `followUpDate` when one is supplied), not as overwrites to a single `notes` string, so history is preserved. The plain `notes` field on the customer remains a separate general free-text field.
+- **List state:** URL-synced via `useSearchParams` (not just in-memory) for search/filter/page, so a refresh or shared link preserves context. Search input is debounced 300ms before it hits the URL/query.
+- **Toast infrastructure:** added a global `ToastProvider`/`useToast` (`frontend/src/lib/toast-context.tsx`), mounted above the router so a toast fired just before a `navigate()` call survives the route change. Precedent for all later specs needing success/error toasts.
+- Response DTOs are built via explicit field allow-listing (never spreading the Prisma row), matching FLO-011's password-hash handling — this caught an internal `createdById` leak during manual testing before it shipped.
+- The FLO-009 `Select` atom's `placeholder` prop renders a `disabled` option that can't be re-selected once left — unusable for "clear filter" UI. Filter selects use an explicit selectable `{ value: "", label: "All types" }` option instead; the `placeholder` prop remains fine for required fields where there's no "clear" affordance.
