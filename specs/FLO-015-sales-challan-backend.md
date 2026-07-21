@@ -5,7 +5,7 @@
 **Status:**
 
 - [ ] Not Started
-- [ ] Completed
+- [x] Completed
 
 ## Description
 
@@ -36,15 +36,15 @@ As a Sales user, I want to build a challan for a customer with multiple products
 
 ## Acceptance Criteria
 
-- [ ] `POST /challans` creates a Draft challan with an auto-generated, unique challan number, correct total quantity, and snapshotted line-item data (name/SKU/price) independent of the live product row, without affecting any product's `currentStock`.
-- [ ] `PATCH /challans/:id` on a Draft can add/remove/update line items and re-snapshots changed items; the same operation on a Confirmed or Cancelled challan is rejected (`409` or `400`, documented choice).
-- [ ] `POST /challans/:id/confirm` on a Draft with sufficient stock for every line item: transitions status to Confirmed, deducts stock for every line item via `StockMovementService`, and is atomic — verified by a test.
-- [ ] `POST /challans/:id/confirm` where at least one line item has insufficient stock: returns `409` naming the specific product(s) short on stock, transitions **no** stock and leaves the challan status as Draft (not partially confirmed) — verified by a test asserting zero stock movements were created.
-- [ ] `POST /challans/:id/confirm` on an already-Confirmed or Cancelled challan is rejected with a clear error (idempotency/state-guard, not a silent no-op or duplicate stock deduction).
-- [ ] `POST /challans/:id/cancel` on a Draft succeeds with no stock effect; on a Confirmed challan succeeds and reverses stock via compensating `IN` movements, per the documented cancel-after-confirm policy.
-- [ ] `GET /challans` supports filtering by status and customer, and searching by challan number, paginated per the FLO-008 envelope.
-- [ ] Role checks: a Warehouse/Accounts-authenticated request to create/confirm/cancel a challan returns `403`.
-- [ ] Concurrency: confirming two challans that together over-commit the same product's stock — one succeeds, the other correctly fails with the insufficient-stock error (this follows directly from FLO-014's guarantees but must be proven again at this module's integration level, since it's the assignment's headline business rule).
+- [x] `POST /challans` creates a Draft challan with an auto-generated, unique challan number, correct total quantity, and snapshotted line-item data (name/SKU/price) independent of the live product row, without affecting any product's `currentStock`.
+- [x] `PATCH /challans/:id` on a Draft can add/remove/update line items and re-snapshots changed items; the same operation on a Confirmed or Cancelled challan is rejected (`409` or `400`, documented choice).
+- [x] `POST /challans/:id/confirm` on a Draft with sufficient stock for every line item: transitions status to Confirmed, deducts stock for every line item via `StockMovementService`, and is atomic — verified by a test.
+- [x] `POST /challans/:id/confirm` where at least one line item has insufficient stock: returns `409` naming the specific product(s) short on stock, transitions **no** stock and leaves the challan status as Draft (not partially confirmed) — verified by a test asserting zero stock movements were created.
+- [x] `POST /challans/:id/confirm` on an already-Confirmed or Cancelled challan is rejected with a clear error (idempotency/state-guard, not a silent no-op or duplicate stock deduction).
+- [x] `POST /challans/:id/cancel` on a Draft succeeds with no stock effect; on a Confirmed challan succeeds and reverses stock via compensating `IN` movements, per the documented cancel-after-confirm policy.
+- [x] `GET /challans` supports filtering by status and customer, and searching by challan number, paginated per the FLO-008 envelope.
+- [x] Role checks: a Warehouse/Accounts-authenticated request to create/confirm/cancel a challan returns `403`.
+- [x] Concurrency: confirming two challans that together over-commit the same product's stock — one succeeds, the other correctly fails with the insufficient-stock error (this follows directly from FLO-014's guarantees but must be proven again at this module's integration level, since it's the assignment's headline business rule).
 
 ## Technical Tasks
 
@@ -65,3 +65,10 @@ FLO-012, FLO-013, FLO-014.
 - The confirm flow's all-or-nothing guarantee is the module's core contract: never call `recordMovement` line-by-line outside a single enclosing transaction that can still roll back everything if a later line item fails. Wrap the whole confirm operation (status transition + every line item's `recordMovement` call) in one Prisma `$transaction`.
 - The cancel-after-confirm stock-reversal policy is an explicit scope decision this spec makes because the assignment is silent on it — document the choice made (reverse via compensating IN movements) directly in this file so it's not rediscovered as an ambiguity mid-implementation.
 - Challan-number generation must be race-safe under concurrent creates — a `SELECT MAX + 1` pattern without a DB-level guarantee (unique constraint + retry, or an atomic sequence) will produce duplicate numbers under load; the unique constraint from FLO-004 on `challanNumber` should be treated as a safety net that a test can deliberately trigger (via forced concurrency) to confirm the generation strategy actually holds up, not just as documentation.
+
+### Decisions made during implementation
+
+- **Challan-number strategy chosen:** "unique constraint + retry" (the alternative this spec's Implementation Notes named, not an atomic DB sequence — a sequence would need its own schema migration for a single counter, which felt like too much ceremony for this). `generateNextChallanNumber` reads the current max `CH-{year}-NNNNNN` and increments; `createChallan` wraps the insert in a retry loop (up to 5 attempts) that catches Prisma's `P2002` on `challanNumber` and regenerates. Proven directly by a test that fires 5 concurrent creates against the same customer/product and asserts all 5 challan numbers are unique. See `backend/src/services/sales-challan.service.ts`.
+- **`recordMovement` needed a signature change to make this module's atomicity possible.** FLO-014 always opened its own `prisma.$transaction(...)` internally, so it had no way to participate in a caller's enclosing transaction — calling it as-is from inside `confirmChallan`'s transaction would have made each line item's stock deduction commit independently, breaking the "no line item's stock is touched if any one is insufficient" guarantee. `recordMovement` now takes an optional second argument, a `Prisma.TransactionClient`; when omitted it self-transacts exactly as before (so FLO-014's manual-adjustment endpoint is unaffected), and when supplied (as `confirmChallan`/`cancelChallan` do) it runs directly on that client, becoming one atomic unit with the status transition. This is the composability FLO-014's own Implementation Notes anticipated but its original signature didn't yet support.
+- **PATCH replaces the entire item list, not a per-item diff.** Simpler to reason about and re-snapshot correctly; the request always supplies the full desired set of `{ productId, quantity }` line items, and the server deletes-and-recreates them (and recomputes `totalQuantity`) in one operation. Only valid on a Draft (`409` otherwise).
+- **Confirm's insufficient-stock error names every short product, not just the first.** Line items are pre-checked against current stock as a batch before any `recordMovement` call, so a multi-item shortfall reports as one message listing every offending product. `recordMovement`'s own atomic per-row guard remains the actual concurrency-safety boundary (the pre-check can still race against a concurrent confirm on the same product; that race is what the concurrency test exercises).
