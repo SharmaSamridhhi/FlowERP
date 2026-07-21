@@ -277,6 +277,14 @@ describe("POST /challans/:id/confirm", () => {
 
     expect(response.status).toBe(409);
     expect(response.body.error.message).toContain(shortProduct.name);
+    expect(response.body.error.details).toEqual([
+      {
+        productId: shortProduct.id,
+        productName: shortProduct.name,
+        requestedQuantity: 5,
+        availableQuantity: 2,
+      },
+    ]);
 
     const refreshedSufficient = await prisma.product.findUniqueOrThrow({
       where: { id: sufficientProduct.id },

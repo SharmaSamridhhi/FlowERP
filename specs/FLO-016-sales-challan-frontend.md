@@ -5,7 +5,7 @@
 **Status:**
 
 - [ ] Not Started
-- [ ] Completed
+- [x] Completed
 
 ## Description
 
@@ -33,14 +33,14 @@ As a Sales user, I want to build a challan by picking a customer and adding prod
 
 ## Acceptance Criteria
 
-- [ ] Creating a challan: selecting a customer, adding two or more product line items with quantities, and saving as Draft succeeds, and the created challan appears correctly on `ChallansListPage` and `ChallanDetailPage` with the correct total quantity.
-- [ ] The line-item table prevents adding the same product twice as separate rows (either merges quantity into the existing row or blocks the duplicate with a clear message — pick one and be consistent) and prevents a non-positive quantity.
-- [ ] Confirming a Draft with sufficient stock transitions its status to Confirmed on screen (via refetch/cache invalidation) without a manual page reload.
-- [ ] Confirming a Draft where a product lacks sufficient stock shows the specific insufficient-stock error inline against the specific line item(s), and the challan remains a Draft on screen.
-- [ ] Editing a Draft (changing quantities/products) and re-saving updates the snapshot and total correctly; attempting to reach the builder for a Confirmed/Cancelled challan is prevented (redirected to the read-only detail view instead).
-- [ ] Cancelling a Confirmed challan requires an explicit confirmation dialog, and after confirming, the challan shows as Cancelled and (per FLO-015) the affected products' stock reflects the reversal (spot-checked against `ProductDetailPage`'s stock movement log from FLO-014).
-- [ ] A Warehouse/Accounts-authenticated user does not see create/confirm/cancel controls (or sees them disabled with an explanatory state), consistent with FLO-015's role matrix.
-- [ ] Frontend tests cover: line-item add/remove/quantity-change logic and total computation (pure logic, testable without a live backend), the insufficient-stock error display path (mocked API response), and status-based control visibility per role.
+- [x] Creating a challan: selecting a customer, adding two or more product line items with quantities, and saving as Draft succeeds, and the created challan appears correctly on `ChallansListPage` and `ChallanDetailPage` with the correct total quantity.
+- [x] The line-item table prevents adding the same product twice as separate rows (either merges quantity into the existing row or blocks the duplicate with a clear message — pick one and be consistent) and prevents a non-positive quantity.
+- [x] Confirming a Draft with sufficient stock transitions its status to Confirmed on screen (via refetch/cache invalidation) without a manual page reload.
+- [x] Confirming a Draft where a product lacks sufficient stock shows the specific insufficient-stock error inline against the specific line item(s), and the challan remains a Draft on screen.
+- [x] Editing a Draft (changing quantities/products) and re-saving updates the snapshot and total correctly; attempting to reach the builder for a Confirmed/Cancelled challan is prevented (redirected to the read-only detail view instead).
+- [x] Cancelling a Confirmed challan requires an explicit confirmation dialog, and after confirming, the challan shows as Cancelled and (per FLO-015) the affected products' stock reflects the reversal (spot-checked against `ProductDetailPage`'s stock movement log from FLO-014).
+- [x] A Warehouse/Accounts-authenticated user does not see create/confirm/cancel controls (or sees them disabled with an explanatory state), consistent with FLO-015's role matrix.
+- [x] Frontend tests cover: line-item add/remove/quantity-change logic and total computation (pure logic, testable without a live backend), the insufficient-stock error display path (mocked API response), and status-based control visibility per role.
 
 ## Technical Tasks
 
@@ -60,3 +60,12 @@ FLO-015.
 
 - Keep the line-item table's add/remove/total logic as pure, testable state management separate from the data-fetching/mutation code — this is the piece of the whole roadmap most worth unit-testing thoroughly, since it's the most complex interactive logic in the frontend.
 - When the confirm mutation fails with the insufficient-stock `409`, don't just show a toast — the whole point of snapshotting the error detail per-product (FLO-015) is so this screen can point at the exact row. Losing that specificity on the frontend would waste real backend work.
+
+### Decisions made during implementation
+
+- **FLO-015 gap found and fixed:** `ConflictError` had no way to carry structured detail — the confirm-insufficient-stock error was message-only ("Insufficient stock for: X, Y"), which this screen would have had to regex-parse to find the offending row, exactly the kind of frontend hack this spec's own notes warn against. Fixed at the source instead: `ConflictError` now accepts an optional `details` param (mirroring `ValidationError`, which already had one), and `confirmChallan` populates it with `InsufficientStockItem[]` (`productId`, `productName`, `requestedQuantity`, `availableQuantity` — new shared schema). `error.details` was already plumbed through the response envelope by FLO-007's error handler, so no other backend change was needed. This is the frontend mapping onto real structured data, not a string-parsing workaround.
+- **Duplicate-product policy: merge, not block.** Adding a product already on the challan increases its existing row's quantity rather than creating a second row or rejecting the add — implemented in `useLineItems.addItem`, unit-tested directly.
+- **Line-item state as a plain hook, not a form library.** `useLineItems` (`frontend/src/pages/challans/useLineItems.ts`) is a self-contained `useState`-backed hook with `addItem`/`removeItem`/`setQuantity`/`reset` and derived `totalQuantity`/`totalValue` — no react-hook-form involved, since the item list's shape (a dynamic array with merge-on-add semantics) doesn't fit that library's flat-field model well. Fully unit-tested via `renderHook` without touching the network.
+- **`SearchSelect` (new molecule, `frontend/src/components/molecules/SearchSelect.tsx`):** a generic, fully-controlled search-as-you-type dropdown (query/options/onSelect all props, no internal fetch — same "no internal state" philosophy as `DataTable`). Reused for both the customer and product pickers in `ChallanBuilderPage`, and for the customer filter on `ChallansListPage`, rather than building bespoke lookups for each.
+- **Builder's "Confirm" button saves then confirms in one step.** Creating/updating the draft and confirming it are two API calls chained client-side; if the confirm half fails with insufficient stock, the draft is already saved (so nothing is lost) and the user is redirected into edit mode for that same id with the per-row errors shown — they never lose their entered data.
+- **State syncing avoids `setState`-in-`useEffect`.** Loading an existing draft's data (and resolving a customerId filter back to a display name) adjusts state during render — comparing the fetched id against what's already loaded and calling the setter directly in the render body — rather than inside a `useEffect`, per `eslint-plugin-react-hooks`'s `set-state-in-effect` rule and React's own guidance. Only genuine side effects (the redirect-away-from-non-Draft navigation) stay in an effect. Mirrors the pattern `CustomersListPage.tsx` already used for its search-input resync.

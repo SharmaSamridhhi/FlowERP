@@ -1,5 +1,6 @@
 import type {
   CreateChallanInput,
+  InsufficientStockItem,
   ListChallansQuery,
   SalesChallan,
   SalesChallanWithItems,
@@ -265,7 +266,13 @@ export async function confirmChallan(
     });
     if (insufficient.length > 0) {
       const names = insufficient.map((item) => item.productNameSnapshot).join(", ");
-      throw new ConflictError(`Insufficient stock for: ${names}`);
+      const details: InsufficientStockItem[] = insufficient.map((item) => ({
+        productId: item.productId,
+        productName: item.productNameSnapshot,
+        requestedQuantity: item.quantity,
+        availableQuantity: productById.get(item.productId)?.currentStock ?? 0,
+      }));
+      throw new ConflictError(`Insufficient stock for: ${names}`, details);
     }
 
     for (const item of challan.items) {
