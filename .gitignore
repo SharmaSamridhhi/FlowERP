@@ -30,3 +30,9 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 .idea/
+
+# Internal planning/config docs (not part of the shipped repo)
+.claude
+CLAUDE.md
+specs
+steering
