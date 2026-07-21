@@ -27,6 +27,15 @@ export function boom(): void {
   throw new Error("Deliberate unhandled error for the error-handler demo route");
 }
 
+// Reference implementation of authenticate + authorize("ADMIN") — proves
+// 401 (no/invalid token), 403 (valid token, wrong role), and 200 (valid
+// Admin token) without depending on any real ADMIN-only business route,
+// none of which exist yet. See specs/FLO-011-auth-rbac.md.
+export function adminOnly(_req: Request, res: Response): void {
+  const body: SuccessEnvelope<{ message: string }> = { data: { message: "Welcome, admin." } };
+  res.status(200).json(body);
+}
+
 // In-memory fake dataset — proves the { data, meta: { pagination } }
 // envelope end-to-end without depending on any real business table.
 const DEMO_ITEMS = Array.from({ length: 25 }, (_, i) => ({
