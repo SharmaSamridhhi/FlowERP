@@ -1,0 +1,6 @@
+{
+  "name": "@flowerp/frontend",
+  "version": "0.0.0",
+  "private": true,
+  "description": "FlowERP admin portal (React, TypeScript, Vite, Tailwind CSS). See specs/FLO-003-frontend-bootstrap.md."
+}
