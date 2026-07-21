@@ -43,3 +43,7 @@ Schema is split by business domain under `prisma/schema/` (`base.prisma` holds t
 **Version note:** pinned to `prisma`/`@prisma/client` `6.19.3` rather than the current `7.x` latest, because Prisma 7 requires Node ≥22 and this project is pinned to Node 20.19.0 (see [FLO-001](../specs/FLO-001-monorepo-foundation.md)'s `.nvmrc`). 6.19.3 is the newest release supporting Node ≥18.18.
 
 Full entity model, relation/`onDelete` rationale, and the snapshot-on-line-items design are documented in [FLO-004](../specs/FLO-004-database-schema-foundation.md).
+
+## Testing
+
+See [TESTING.md](TESTING.md) for conventions, how to run tests, and the coverage threshold.
