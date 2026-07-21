@@ -7,6 +7,9 @@ import NotFoundPage from "./pages/NotFoundPage";
 import CustomerDetailPage from "./pages/customers/CustomerDetailPage";
 import CustomerFormPage from "./pages/customers/CustomerFormPage";
 import CustomersListPage from "./pages/customers/CustomersListPage";
+import ProductDetailPage from "./pages/products/ProductDetailPage";
+import ProductFormPage from "./pages/products/ProductFormPage";
+import ProductsListPage from "./pages/products/ProductsListPage";
 import { AppLayout } from "./routing/AppLayout";
 import { ProtectedRoute } from "./routing/ProtectedRoute";
 
@@ -21,6 +24,10 @@ function App() {
           <Route path="/customers/new" element={<CustomerFormPage />} />
           <Route path="/customers/:id/edit" element={<CustomerFormPage />} />
           <Route path="/customers/:id" element={<CustomerDetailPage />} />
+          <Route path="/products" element={<ProductsListPage />} />
+          <Route path="/products/new" element={<ProductFormPage />} />
+          <Route path="/products/:id/edit" element={<ProductFormPage />} />
+          <Route path="/products/:id" element={<ProductDetailPage />} />
         </Route>
       </Route>
       {import.meta.env.DEV && <Route path="/dev/api-demo" element={<ApiDemoPage />} />}

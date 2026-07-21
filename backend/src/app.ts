@@ -8,6 +8,7 @@ import authRoute from "./routes/auth.route.js";
 import customersRoute from "./routes/customers.route.js";
 import healthRoute from "./routes/health.route.js";
 import validationDemoRoute from "./routes/internal/validation-demo.route.js";
+import productsRoute from "./routes/products.route.js";
 
 const app: Express = express();
 
@@ -21,6 +22,7 @@ if (env.nodeEnv !== "test") {
 app.use("/health", healthRoute);
 app.use("/auth", authRoute);
 app.use("/customers", customersRoute);
+app.use("/products", productsRoute);
 
 // Reference implementation of validateRequest + AppError, for Phase 3
 // modules to model their own routes on. Not mounted in production.
