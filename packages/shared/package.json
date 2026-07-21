@@ -2,5 +2,8 @@
   "name": "@flowerp/shared",
   "version": "0.0.0",
   "private": true,
-  "description": "Zod schemas and inferred TypeScript types shared between @flowerp/backend and @flowerp/frontend. See specs/FLO-008-shared-contracts.md."
+  "description": "Zod schemas and inferred TypeScript types shared between @flowerp/backend and @flowerp/frontend. See specs/FLO-008-shared-contracts.md.",
+  "dependencies": {
+    "zod": "^4.4.3"
+  }
 }
