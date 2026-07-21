@@ -12,6 +12,9 @@ out/
 .env.*
 !.env.example
 
+# Prisma generated client
+backend/src/generated/
+
 # Testing / coverage
 coverage/
 

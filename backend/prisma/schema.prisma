@@ -1,0 +1,234 @@
+// FlowERP data model. See specs/FLO-004-database-schema-foundation.md for
+// the design rationale behind snapshotting, onDelete policies, and the
+// StockMovement source-tracing fields.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  SALES
+  WAREHOUSE
+  ACCOUNTS
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  customersCreated      Customer[]
+  customerFollowUps     CustomerFollowUp[]
+  stockMovementsCreated StockMovement[]
+  salesChallansCreated  SalesChallan[]
+  purchaseOrdersCreated PurchaseOrder[]
+
+  @@map("users")
+}
+
+enum CustomerType {
+  RETAIL
+  WHOLESALE
+  DISTRIBUTOR
+}
+
+enum CustomerStatus {
+  LEAD
+  ACTIVE
+  INACTIVE
+}
+
+model Customer {
+  id           String         @id @default(cuid())
+  name         String
+  mobile       String
+  email        String?
+  businessName String?
+  gstNumber    String?
+  type         CustomerType
+  address      String?
+  status       CustomerStatus @default(LEAD)
+  followUpDate DateTime?
+  notes        String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  followUps     CustomerFollowUp[]
+  salesChallans SalesChallan[]
+
+  @@index([name])
+  @@index([mobile])
+  @@index([email])
+  @@map("customers")
+}
+
+model CustomerFollowUp {
+  id        String   @id @default(cuid())
+  note      String
+  createdAt DateTime @default(now())
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@index([customerId])
+  @@map("customer_follow_ups")
+}
+
+model Product {
+  id                    String   @id @default(cuid())
+  name                  String
+  sku                   String   @unique
+  category              String
+  unitPrice             Decimal  @db.Decimal(12, 2)
+  currentStock          Int      @default(0)
+  minStockAlertQuantity Int      @default(0)
+  location              String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  stockMovements     StockMovement[]
+  salesChallanItems  SalesChallanItem[]
+  purchaseOrderItems PurchaseOrderItem[]
+
+  @@index([name])
+  @@map("products")
+}
+
+enum StockMovementType {
+  IN
+  OUT
+}
+
+// Light-touch traceability, not a full polymorphic association: tells you
+// which module caused a movement without a join, without a table per source.
+enum StockMovementSource {
+  CHALLAN
+  PURCHASE_ORDER
+  MANUAL
+}
+
+model StockMovement {
+  id         String               @id @default(cuid())
+  quantity   Int
+  type       StockMovementType
+  reason     String
+  sourceType StockMovementSource?
+  sourceId   String?
+  createdAt  DateTime             @default(now())
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([productId])
+  @@index([createdAt])
+  @@map("stock_movements")
+}
+
+enum SalesChallanStatus {
+  DRAFT
+  CONFIRMED
+  CANCELLED
+}
+
+model SalesChallan {
+  id            String             @id @default(cuid())
+  challanNumber String             @unique
+  status        SalesChallanStatus @default(DRAFT)
+  totalQuantity Int                @default(0)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
+
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  items SalesChallanItem[]
+
+  @@index([challanNumber])
+  @@index([status])
+  @@map("sales_challans")
+}
+
+// Line items snapshot product name/SKU/price at add-time so a challan's
+// contents never change retroactively when the live product changes.
+model SalesChallanItem {
+  id                  String  @id @default(cuid())
+  productNameSnapshot String
+  productSkuSnapshot  String
+  unitPriceSnapshot   Decimal @db.Decimal(12, 2)
+  quantity            Int
+
+  challanId String
+  challan   SalesChallan @relation(fields: [challanId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([challanId])
+  @@map("sales_challan_items")
+}
+
+enum PurchaseOrderStatus {
+  DRAFT
+  RECEIVED
+  CANCELLED
+}
+
+// No Supplier entity — supplierName is a plain field. See the scope
+// decision recorded in specs/README.md and specs/FLO-017-purchase-order.md.
+model PurchaseOrder {
+  id           String              @id @default(cuid())
+  poNumber     String              @unique
+  supplierName String
+  status       PurchaseOrderStatus @default(DRAFT)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  items PurchaseOrderItem[]
+
+  @@index([poNumber])
+  @@index([status])
+  @@map("purchase_orders")
+}
+
+model PurchaseOrderItem {
+  id                  String  @id @default(cuid())
+  productNameSnapshot String
+  productSkuSnapshot  String
+  unitCost            Decimal @db.Decimal(12, 2)
+  quantity            Int
+
+  purchaseOrderId String
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([purchaseOrderId])
+  @@map("purchase_order_items")
+}
