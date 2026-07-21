@@ -3,6 +3,7 @@
 **Phase:** 4 — Deployment & Release Readiness
 
 **Status:**
+
 - [ ] Not Started
 - [ ] Completed
 
@@ -17,6 +18,7 @@ As an evaluator or user of this system, I want to reach a live, working frontend
 ## Scope
 
 **Included:**
+
 - Backend deployed to a free-tier Node host, configured with the production environment variables per FLO-018's contract (set in the host's dashboard, not committed), connected to the managed Postgres instance, migrations applied against the live database (`prisma migrate deploy`, run as a one-off release step or command per the chosen host's mechanism).
 - Managed Postgres instance provisioned (Supabase/Neon/Render Postgres or equivalent), with the connection string set as the backend's `DATABASE_URL`.
 - Frontend deployed to a free-tier static host, built with `VITE_API_BASE_URL` pointed at the live backend URL, and the live backend's `CORS_ORIGIN` updated to allow the live frontend's origin (closing the loop FLO-018 set up).
@@ -25,6 +27,7 @@ As an evaluator or user of this system, I want to reach a live, working frontend
 - A documented, safe seeding step for the production database (the four demo role accounts from FLO-011, at minimum) — run once, deliberately, not on every deploy.
 
 **Excluded:**
+
 - AWS deployment itself (explicitly optional/bonus per the assignment; not required by this roadmap either — if pursued, it would be a Phase 5 addition, but is not scheduled as its own spec since the assignment doesn't require it and doing so isn't necessary to satisfy any mandatory project instruction).
 - Automated redeploy-on-merge (FLO-022, Phase 5) — this spec is the first, manually-triggered deployment proving the target hosting setup works at all; automating it is a deliberately separate, deferrable concern.
 

@@ -3,6 +3,7 @@
 **Phase:** 2 — Engineering Foundations (Good Practices I)
 
 **Status:**
+
 - [ ] Not Started
 - [ ] Completed
 
@@ -17,13 +18,15 @@ As anyone reviewing a pull request against this repository, I want an automated 
 ## Scope
 
 **Included:**
+
 - `.github/workflows/ci.yml` triggered on `pull_request` (any branch) and `push` to `main`.
 - Job steps: checkout, Node setup (version pinned to `.nvmrc` from FLO-001), `npm ci` at root (installing all workspaces), `npm run lint`, `tsc --noEmit` (or equivalent type-check script) per package, `npm run test:coverage`, `npm run build` for `backend` and `frontend`.
 - Dependency caching (`actions/setup-node`'s built-in npm cache, keyed on `package-lock.json`) so CI runs stay fast as the repo grows through Phase 3.
-- A required-status-check posture documented (branch protection itself is a GitHub repo setting the user configures, not something committed to the repo — this spec documents that it *should* be turned on, but doesn't assume the agent can or should change GitHub repository settings).
+- A required-status-check posture documented (branch protection itself is a GitHub repo setting the user configures, not something committed to the repo — this spec documents that it _should_ be turned on, but doesn't assume the agent can or should change GitHub repository settings).
 - Job fails fast and clearly: a lint failure, type error, test failure, or build failure each produce a visibly failed CI run with the offending step identifiable from the workflow logs.
 
 **Excluded:**
+
 - Any deployment or environment-specific step (build artifacts are not published anywhere) — that's FLO-022.
 - Database provisioning inside CI for integration tests — if FLO-006/FLO-011's test strategy ends up needing a real Postgres for integration tests, this workflow adds a Postgres service container at that point; until then, this spec only wires up what the test scripts already need to run headlessly.
 - Enabling GitHub branch-protection rules themselves (a repo-admin action outside this codebase's scope, left to the user).

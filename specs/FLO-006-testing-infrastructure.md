@@ -3,6 +3,7 @@
 **Phase:** 2 — Engineering Foundations (Good Practices I)
 
 **Status:**
+
 - [ ] Not Started
 - [ ] Completed
 
@@ -17,6 +18,7 @@ As a developer implementing a business module, I want a working test runner and 
 ## Scope
 
 **Included:**
+
 - Vitest configured in `backend` (Node environment) and `frontend` (jsdom environment), each with its own `vitest.config.ts`.
 - `supertest` added to `backend` for HTTP-level route testing against the exported Express `app` (from FLO-002's `app.ts`/`server.ts` split).
 - React Testing Library + `@testing-library/jest-dom` matchers added to `frontend`.
@@ -26,6 +28,7 @@ As a developer implementing a business module, I want a working test runner and 
 - A short testing-conventions doc (co-located, e.g., `backend/TESTING.md` / `frontend/TESTING.md`, or a section in the root repo-map from FLO-001): file naming (`*.test.ts` / `*.test.tsx`, colocated with source), what "unit" vs "integration" means in this repo (service-layer tests mock the DB client; route-level tests use Supertest against a test database — test DB strategy is finalized when FLO-011 introduces the first real data-backed routes, this spec only proves the runner works).
 
 **Excluded:**
+
 - End-to-end/browser automation testing (not required by the assignment; not introduced anywhere in this roadmap unless a future need arises).
 - Actual business-logic tests for auth/customers/products/etc. — those belong to their owning spec (FLO-011 onward) and must meet the coverage threshold set here.
 - Test-database provisioning/seeding strategy for integration tests against Prisma — established when the first spec needing it (FLO-011) writes real data-backed tests; this spec's example tests don't touch the database.

@@ -1,0 +1,7 @@
+node_modules
+dist
+build
+coverage
+backend/src/generated
+*.tsbuildinfo
+package-lock.json

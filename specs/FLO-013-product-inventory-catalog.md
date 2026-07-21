@@ -3,6 +3,7 @@
 **Phase:** 3 — Core Business Modules
 
 **Status:**
+
 - [ ] Not Started
 - [ ] Completed
 
@@ -17,6 +18,7 @@ As a Warehouse or Admin user, I want to add and edit products with their pricing
 ## Scope
 
 **Included:**
+
 - Backend REST endpoints: `POST /products`, `GET /products` (paginated, searchable by name/SKU, filterable by category and by low-stock status), `GET /products/:id`, `PATCH /products/:id`.
 - All fields from the assignment: product name, SKU/code (unique), category, unit price, current stock, minimum stock alert quantity, location/warehouse.
 - Zod schemas (`product.schema.ts`) in `packages/shared`, following FLO-012's established pattern.
@@ -25,6 +27,7 @@ As a Warehouse or Admin user, I want to add and edit products with their pricing
 - Frontend: `ProductsListPage` (`DataTable` with a low-stock visual indicator via the `Badge` atom, search, category filter, low-stock-only filter), `ProductFormPage` (add/edit, client-side validated via the shared schema and the form pattern established in FLO-012), `ProductDetailPage` (all fields; the stock-movement history table itself is added to this page by FLO-014, not this spec).
 
 **Excluded:**
+
 - Product deletion (not in the assignment's required feature list — only add/edit).
 - The stock movement log/ledger itself, and any endpoint that changes `currentStock` directly (FLO-014 owns all stock mutation — this spec's `PATCH /products/:id` explicitly must **not** allow changing `currentStock`, to keep "what changes stock" a single, auditable code path).
 - Product image upload (bonus — FLO-024, Phase 5).

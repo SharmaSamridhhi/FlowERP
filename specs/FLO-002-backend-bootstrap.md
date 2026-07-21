@@ -3,6 +3,7 @@
 **Phase:** 1 — Project Foundation
 
 **Status:**
+
 - [ ] Not Started
 - [x] Completed
 
@@ -17,6 +18,7 @@ As a backend developer, I want a running Express + TypeScript server with a clea
 ## Scope
 
 **Included:**
+
 - Express.js + TypeScript project in `backend/`, with `tsconfig.json` (strict mode on).
 - Folder structure: `src/config`, `src/routes`, `src/controllers`, `src/services`, `src/middlewares`, `src/utils`, `src/types`, with a short README comment or doc explaining the layering (route → controller → service).
 - A config module that loads environment variables (via `process.env`, no validation yet — validation arrives in FLO-007) with sane local defaults for `PORT`, `NODE_ENV`.
@@ -25,6 +27,7 @@ As a backend developer, I want a running Express + TypeScript server with a clea
 - Base Express app wiring: JSON body parsing, CORS (permissive for local dev), a request logger (e.g., `morgan` in dev mode), and a not-found (404) fallback handler.
 
 **Excluded:**
+
 - Database connection (FLO-004).
 - Any validation middleware or Zod usage (FLO-007).
 - Any real route beyond `/health` (all business modules are Phase 3).

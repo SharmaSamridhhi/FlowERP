@@ -3,6 +3,7 @@
 **Phase:** 1 — Project Foundation
 
 **Status:**
+
 - [ ] Not Started
 - [x] Completed
 
@@ -17,6 +18,7 @@ As a developer joining this repository, I want a predictable, documented root st
 ## Scope
 
 **Included:**
+
 - Root `package.json` configured as an npm workspaces root (`workspaces: ["backend", "frontend", "packages/*"]`).
 - Empty placeholder packages: `backend/`, `frontend/`, `packages/shared/`, each with a minimal `package.json` (name, version, `private: true`) so the workspace resolves — actual app code is out of scope (FLO-002, FLO-003).
 - `.nvmrc` (or `engines` field) pinning the Node.js major version.
@@ -26,6 +28,7 @@ As a developer joining this repository, I want a predictable, documented root st
 - Directory-naming and module-naming conventions written down (e.g., kebab-case folders, PascalCase React components, `*.service.ts` / `*.controller.ts` suffixes on the backend).
 
 **Excluded:**
+
 - Any actual backend or frontend runtime code (FLO-002, FLO-003).
 - Database schema (FLO-004).
 - Lint/format tool configuration itself (FLO-005) — this spec only creates the folders those configs will later live in.

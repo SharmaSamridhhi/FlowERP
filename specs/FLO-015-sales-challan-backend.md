@@ -3,6 +3,7 @@
 **Phase:** 3 — Core Business Modules
 
 **Status:**
+
 - [ ] Not Started
 - [ ] Completed
 
@@ -17,6 +18,7 @@ As a Sales user, I want to build a challan for a customer with multiple products
 ## Scope
 
 **Included:**
+
 - Backend REST endpoints: `POST /challans` (create as Draft; body includes customer id and line items with product id + quantity), `GET /challans` (paginated, filterable by status/customer, searchable by challan number), `GET /challans/:id`, `PATCH /challans/:id` (edit a Draft's customer/line items — Confirmed/Cancelled challans are immutable except for status transitions), `POST /challans/:id/confirm`, `POST /challans/:id/cancel`.
 - Auto-generated, human-readable, unique challan number (e.g., a date-scoped sequence like `CH-2026-000123`) assigned at creation.
 - Line items store a **product snapshot** (name, SKU, unit price at time of add) alongside the live `productId` reference, per the assignment's explicit requirement — snapshot is captured at line-item creation/edit time, not re-derived later.
@@ -27,6 +29,7 @@ As a Sales user, I want to build a challan for a customer with multiple products
 - Role access: Sales and Admin can create/edit/confirm/cancel; Warehouse/Accounts have read access (documented matrix, following FLO-012's precedent).
 
 **Excluded:**
+
 - Any UI (FLO-016).
 - Invoice generation from a confirmed challan (FLO-023, Phase 5, per the scope decision in [specs/README.md](README.md)).
 - Editing a Confirmed challan's line items (only Draft challans are editable; a Confirmed challan can only transition to Cancelled).

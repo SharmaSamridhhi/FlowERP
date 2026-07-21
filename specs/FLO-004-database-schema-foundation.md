@@ -3,6 +3,7 @@
 **Phase:** 1 — Project Foundation
 
 **Status:**
+
 - [ ] Not Started
 - [x] Completed
 
@@ -17,6 +18,7 @@ As a backend developer, I want the complete relational schema for the applicatio
 ## Scope
 
 **Included:**
+
 - Prisma installed in `backend/`, connected to a local PostgreSQL instance via `DATABASE_URL`.
 - Prisma schema, split by business domain under `prisma/schema/` (multi-file schema, stable as of the Prisma version this project uses — see Implementation Notes), modeling:
   - `User` (id, name, email, password hash, role enum: `ADMIN | SALES | WAREHOUSE | ACCOUNTS`, timestamps).
@@ -33,6 +35,7 @@ As a backend developer, I want the complete relational schema for the applicatio
 - Indexes on frequently-filtered/searched columns (customer name/mobile/email, product SKU/name, challan number, PO number).
 
 **Excluded:**
+
 - Any repository/service code that queries these models (each Phase 3 module writes its own data-access layer).
 - Zod validation schemas for these entities (FLO-007/FLO-008) — this spec is the persistence layer only.
 - Invoice table — deferred to FLO-023, where the Invoice model and its relation to `SalesChallan` are defined alongside the feature that uses it, keeping this foundational migration focused on what Phase 3 actually needs.
@@ -63,7 +66,7 @@ FLO-001, FLO-002.
 
 ## Implementation Notes
 
-- `StockMovement.sourceType`/`sourceId` is a deliberate light-touch traceability mechanism (not a full polymorphic association pattern) so FLO-014/015/017 can record *why* a movement happened without redesigning the ledger later. Keep it simple: an enum (`CHALLAN | PURCHASE_ORDER | MANUAL`) plus a nullable UUID.
+- `StockMovement.sourceType`/`sourceId` is a deliberate light-touch traceability mechanism (not a full polymorphic association pattern) so FLO-014/015/017 can record _why_ a movement happened without redesigning the ledger later. Keep it simple: an enum (`CHALLAN | PURCHASE_ORDER | MANUAL`) plus a nullable UUID.
 - Snapshotting on challan/PO line items is a hard requirement from the assignment ("Challan should store product snapshot data, not only product ID") — do not model `SalesChallanItem`/`PurchaseOrderItem` as a bare foreign key to `Product` with no duplicated fields.
 - Money/price fields should use a `Decimal` (Prisma `Decimal` type / Postgres `numeric`), never a float, to avoid rounding errors in totals.
 - This spec intentionally does not create a `Supplier` model — Purchase Orders (FLO-017) use a plain `supplierName` text field per the scope decision recorded in [specs/README.md](README.md).

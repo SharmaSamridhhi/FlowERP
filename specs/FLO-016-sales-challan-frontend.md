@@ -3,6 +3,7 @@
 **Phase:** 3 — Core Business Modules
 
 **Status:**
+
 - [ ] Not Started
 - [ ] Completed
 
@@ -17,14 +18,16 @@ As a Sales user, I want to build a challan by picking a customer and adding prod
 ## Scope
 
 **Included:**
+
 - `ChallansListPage`: `DataTable` with status filter (Draft/Confirmed/Cancelled), customer filter, challan-number search, pagination — following FLO-012/013's established list-page pattern.
-- `ChallanBuilderPage` (used for both create and edit-while-Draft): customer selector (searchable, backed by `GET /customers`), a dynamic line-item table (add row → search/select product → enter quantity → shows snapshotted unit price and computed line total, using the product's *current* price at add-time, matching FLO-015's snapshot-at-add-time contract), running total quantity and total value, Save-as-Draft and Confirm actions.
+- `ChallanBuilderPage` (used for both create and edit-while-Draft): customer selector (searchable, backed by `GET /customers`), a dynamic line-item table (add row → search/select product → enter quantity → shows snapshotted unit price and computed line total, using the product's _current_ price at add-time, matching FLO-015's snapshot-at-add-time contract), running total quantity and total value, Save-as-Draft and Confirm actions.
 - Confirm action: on submit, calls the confirm endpoint; on a `409` insufficient-stock response, surfaces exactly which product(s) are short (from FLO-015's error detail) inline in the line-item table — not just a generic toast — so the user can fix quantities without guessing.
 - `ChallanDetailPage`: read-only view of a Confirmed/Cancelled challan (all fields, line items, status, created by/date); for a Draft, offers Edit (routes back into `ChallanBuilderPage`), Confirm, and Cancel actions inline; for a Confirmed challan, offers Cancel (per FLO-015's reversal policy) with a confirmation dialog (`Modal` from FLO-009) since it has a real stock-reversing side effect.
 - Status displayed via the `Badge` atom (Draft/Confirmed/Cancelled, visually distinct).
 - Product/customer selectors reuse `SearchBar`/`DataTable`-adjacent patterns already established rather than inventing new lookup UI.
 
 **Excluded:**
+
 - Any change to the backend contract — this spec consumes FLO-015 exactly as built; if a gap is found, it's a defect against FLO-015, not something patched around on the frontend.
 - Print/PDF export of a challan (only invoices get PDF export, per FLO-023 — a challan's `ChallanDetailPage` is a normal screen, not a print target, unless the user later asks for that explicitly).
 

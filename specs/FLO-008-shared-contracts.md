@@ -3,12 +3,13 @@
 **Phase:** 2 — Engineering Foundations (Good Practices I)
 
 **Status:**
+
 - [ ] Not Started
 - [ ] Completed
 
 ## Description
 
-Turn `packages/shared` into the single source of truth for request/response shapes shared between frontend and backend: a standard success-response envelope, pagination/filter/search query-param helpers, and the convention that every entity's Zod schema (once authored by its owning Phase 3 spec) lives in `packages/shared` so both apps import the *same* schema and the *same* inferred TypeScript type. This spec also builds the frontend's base API client (fetch wrapper + TanStack Query setup) that consumes this envelope. Without this in place before Phase 3, backend and frontend types for the same entity would inevitably drift.
+Turn `packages/shared` into the single source of truth for request/response shapes shared between frontend and backend: a standard success-response envelope, pagination/filter/search query-param helpers, and the convention that every entity's Zod schema (once authored by its owning Phase 3 spec) lives in `packages/shared` so both apps import the _same_ schema and the _same_ inferred TypeScript type. This spec also builds the frontend's base API client (fetch wrapper + TanStack Query setup) that consumes this envelope. Without this in place before Phase 3, backend and frontend types for the same entity would inevitably drift.
 
 ## User Story
 
@@ -17,6 +18,7 @@ As a developer working across the stack, I want one shared definition of API res
 ## Scope
 
 **Included:**
+
 - `packages/shared` structured as: `src/schemas/` (empty now, populated per-entity by Phase 3 specs, e.g. `customer.schema.ts` added by FLO-012), `src/http/` (envelope + pagination types), `src/index.ts` barrel export. Built as a TypeScript library consumable by both `backend` and `frontend` (project references or a simple `tsc` build step, whichever keeps dev-mode hot-reload working in both apps).
 - Success envelope type/helper: `{ data: T, meta?: { pagination?: {...} } }`, paired with FLO-007's error envelope so every response — success or failure — has one predictable top-level shape.
 - Pagination contract: shared `PaginationQuery` Zod schema (`page`, `limit` with sane bounds/defaults) and a backend helper that turns a Prisma `count` + page/limit into the `meta.pagination` object (`page`, `limit`, `total`, `totalPages`).
@@ -25,7 +27,8 @@ As a developer working across the stack, I want one shared definition of API res
 - Demonstrated end-to-end against the `/health` route: frontend calls it through the API client and renders the result, proving the envelope/client work together before any real entity exists.
 
 **Excluded:**
-- Any entity-specific schema (customer, product, challan, PO, user) — each is authored inside its owning Phase 3 spec, but *placed in* `packages/shared` and following the conventions this spec defines.
+
+- Any entity-specific schema (customer, product, challan, PO, user) — each is authored inside its owning Phase 3 spec, but _placed in_ `packages/shared` and following the conventions this spec defines.
 - Auth token attachment logic itself (FLO-011) — this spec leaves the extension point (a single function the client calls to get the current token) but does not implement auth.
 
 ## Acceptance Criteria
@@ -54,5 +57,5 @@ FLO-002, FLO-003, FLO-007.
 ## Implementation Notes
 
 - Resist building a generic, reusable "filter builder" abstraction — the assignment needs search/filter on a handful of list endpoints, not a query DSL. Document the pattern (e.g., "list endpoints accept `search`, plus documented filter keys per entity, translated directly to a Prisma `where` in the service layer") and let each module apply it directly.
-- The reason entity schemas live in `packages/shared` rather than only in `backend`: the frontend needs the *same* Zod schema (or its inferred type) for client-side form validation in Phase 3, so authoring it once, in the shared package, and importing it from both sides is what actually prevents drift — duplicating a "backend schema" and a "frontend type" would recreate the exact problem this spec exists to prevent.
+- The reason entity schemas live in `packages/shared` rather than only in `backend`: the frontend needs the _same_ Zod schema (or its inferred type) for client-side form validation in Phase 3, so authoring it once, in the shared package, and importing it from both sides is what actually prevents drift — duplicating a "backend schema" and a "frontend type" would recreate the exact problem this spec exists to prevent.
 - TanStack Query is introduced here (not FLO-003) specifically because it needs something real to fetch — introducing it before the API client and envelope existed would mean configuring it against nothing.

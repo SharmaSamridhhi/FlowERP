@@ -3,6 +3,7 @@
 **Phase:** 3 — Core Business Modules
 
 **Status:**
+
 - [ ] Not Started
 - [ ] Completed
 
@@ -17,6 +18,7 @@ As a Warehouse or Admin user, I want to record a purchase order for incoming sto
 ## Scope
 
 **Included:**
+
 - Backend REST endpoints: `POST /purchase-orders` (create as Draft; supplier name as a plain text field, no supplier entity/CRUD; line items with product id + quantity + unit cost), `GET /purchase-orders` (paginated, filterable by status, searchable by PO number/supplier name), `GET /purchase-orders/:id`, `PATCH /purchase-orders/:id` (edit a Draft), `POST /purchase-orders/:id/receive`, `POST /purchase-orders/:id/cancel`.
 - Auto-generated, unique PO number (same race-safe generation approach decided in FLO-015, applied here for consistency — not reinvented).
 - Line items store a product snapshot (name, SKU) alongside `productId`, plus unit cost as entered on the PO (a purchase cost, distinct from and not overwriting the product's sale `unitPrice`).
@@ -27,6 +29,7 @@ As a Warehouse or Admin user, I want to record a purchase order for incoming sto
 - Role access: Warehouse and Admin can create/edit/receive/cancel; Sales/Accounts have read access (documented matrix).
 
 **Excluded:**
+
 - Any Supplier entity, supplier management screen, or supplier contact data beyond a free-text name — an explicit, documented scope cut given the assignment's silence on this entity (see [specs/README.md](README.md)).
 - Partial receiving (receiving only some line items/quantities of a PO) — this spec models receive as all-or-nothing per PO, matching the assignment's level of detail (which gives none for this module) rather than inventing a more complex partial-fulfillment flow the assignment never asked for.
 
