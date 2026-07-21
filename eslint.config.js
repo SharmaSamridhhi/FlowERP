@@ -42,5 +42,56 @@ export default tseslint.config(
     files: ["frontend/**/*.{ts,tsx}"],
     ...reactRefresh.configs.vite,
   },
+  // Atomic Design dependency direction: atoms -> molecules -> organisms ->
+  // templates -> pages, never sideways or down. See
+  // specs/FLO-009-design-system-foundation.md.
+  {
+    files: ["frontend/src/components/atoms/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["**/molecules/**", "**/organisms/**", "**/templates/**"],
+              message: "Atoms may not import from molecules/organisms/templates.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ["frontend/src/components/molecules/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["**/organisms/**", "**/templates/**"],
+              message: "Molecules may not import from organisms/templates.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ["frontend/src/components/organisms/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["**/templates/**"],
+              message: "Organisms may not import from templates.",
+            },
+          ],
+        },
+      ],
+    },
+  },
   eslintConfigPrettier,
 );
