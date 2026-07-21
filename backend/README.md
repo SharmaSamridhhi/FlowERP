@@ -27,7 +27,7 @@ Requests flow one direction: `routes` → `controllers` → `services`.
 
 - `PORT` — port the server listens on. Defaults to `4000`.
 - `NODE_ENV` — `development` | `production` | `test`. Defaults to `development`.
-- `DATABASE_URL` — PostgreSQL connection string used by Prisma, e.g. `postgresql://<user>@localhost:5432/flowerp_dev?schema=public`. Read from `backend/.env` (gitignored — see `backend/.env` locally, or create one; there is no committed `.env.example` yet, that arrives in [FLO-018](../specs/FLO-018-env-config-secrets.md)).
+- `DATABASE_URL` — PostgreSQL connection string used by Prisma, e.g. `postgresql://<user>@localhost:5432/flowerp_dev?schema=public`. Read from `backend/.env` (gitignored — create one locally; there is no committed `.env.example` yet, that arrives in [FLO-018](../specs/FLO-018-env-config-secrets.md)). **Must be set before running `npm install`**, not just before migrating — `postinstall` runs `prisma generate`, which needs a syntactically valid `DATABASE_URL` to load `prisma.config.ts` even though `generate` never actually connects to it.
 
 Formal validation and `.env` file conventions arrive in [FLO-018](../specs/FLO-018-env-config-secrets.md).
 

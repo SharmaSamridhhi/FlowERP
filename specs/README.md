@@ -42,7 +42,7 @@ The assignment leaves some technology choices open ("Express.js or NestJS", "Pos
 | [FLO-007](FLO-007-validation-error-handling.md)  | Runtime Validation & Centralized Error Handling           | 2     | ✅ Completed   | FLO-002, FLO-004                            |
 | [FLO-008](FLO-008-shared-contracts.md)           | Shared API Contracts, Response Envelope & Query Utilities | 2     | ✅ Completed   | FLO-002, FLO-003, FLO-007                   |
 | [FLO-009](FLO-009-design-system-foundation.md)   | Frontend Design System Foundation (Atomic Design)         | 2     | ✅ Completed   | FLO-003, FLO-005                            |
-| [FLO-010](FLO-010-ci-pipeline.md)                | Continuous Integration Pipeline                           | 2     | ⬜ Not Started | FLO-005, FLO-006                            |
+| [FLO-010](FLO-010-ci-pipeline.md)                | Continuous Integration Pipeline                           | 2     | ✅ Completed   | FLO-005, FLO-006                            |
 | [FLO-011](FLO-011-auth-rbac.md)                  | Authentication & Role-Based Access Control                | 3     | ⬜ Not Started | FLO-004, FLO-007, FLO-008, FLO-009, FLO-010 |
 | [FLO-012](FLO-012-customer-crm.md)               | Customer CRM Module                                       | 3     | ⬜ Not Started | FLO-011                                     |
 | [FLO-013](FLO-013-product-inventory-catalog.md)  | Product & Inventory Catalog Module                        | 3     | ⬜ Not Started | FLO-011                                     |
