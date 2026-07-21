@@ -5,7 +5,7 @@
 **Status:**
 
 - [ ] Not Started
-- [ ] Completed
+- [x] Completed
 
 ## Description
 
@@ -66,3 +66,6 @@ FLO-004, FLO-007, FLO-008, FLO-009, FLO-010.
 - Token storage: kept in memory (React context/state), not `localStorage`, to avoid persistent XSS-exfiltrable tokens; the tradeoff is the session doesn't survive a hard page refresh without a re-login. This is an acceptable, documented tradeoff for an internal tool at this scope — call it out explicitly in FLO-021's "known limitations" section rather than solving it with refresh-token infrastructure the assignment doesn't ask for.
 - This is the first spec to write real integration tests against the Prisma-backed database; decide here (and document in `backend/TESTING.md` per FLO-006) whether integration tests run against a real local/CI Postgres instance or a test-specific schema — do not mock Prisma for these tests, since auth correctness (hashing, token issuance) is exactly the kind of logic that's dangerous to test only against mocks.
 - Seed credentials must be safe to publish (per FLO-021's submission requirement for "test login credentials for all roles") — don't reuse them as anything resembling a real production secret.
+- Test-database decision, made here: a real, separate Postgres database (`flowerp_test` locally, an ephemeral `postgres:16` service container in CI), never mocked and never the dev database. Tests self-seed via `beforeAll`/`afterAll` rather than depending on `prisma/seed.ts`. See `backend/TESTING.md`.
+- Two real gaps surfaced while implementing (not visible from reading the code, only from actually running things): (1) `backend/src/server.ts` never loaded `.env` — only `prisma.config.ts` did, for the Prisma CLI specifically — so `npm run dev` silently ran with unset env vars until `JWT_SECRET`'s fail-fast check made that impossible to miss. Fixed by adding `import "dotenv/config"` as the first line of `server.ts`. (2) FLO-010's CI workflow had no real database, only a placeholder `DATABASE_URL` for `prisma generate`; since this spec is the first with data-backed routes, `.github/workflows/ci.yml` now provisions a `postgres:16` service container and runs `prisma migrate deploy` before tests, exactly as FLO-010 anticipated deferring to "the spec that needs it."
+- Verified with `act` (a local GitHub Actions runner against a real Docker daemon) against a genuinely clean checkout, including the new Postgres service container — not just locally.

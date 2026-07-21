@@ -12,19 +12,24 @@
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "db:migrate:deploy": "prisma migrate deploy"
   },
   "dependencies": {
     "@flowerp/shared": "^0.0.0",
     "@prisma/client": "^6.19.3",
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
     "morgan": "^1.11.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.10",
     "@types/node": "^20.19.43",
     "@types/supertest": "^7.2.1",

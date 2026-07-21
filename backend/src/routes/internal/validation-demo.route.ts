@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  adminOnly,
   boom,
   list,
   listQuerySchema,
@@ -7,6 +8,8 @@ import {
   paginatedList,
   paginatedListQuerySchema,
 } from "../../controllers/internal/validation-demo.controller.js";
+import { authenticate } from "../../middlewares/authenticate.middleware.js";
+import { authorize } from "../../middlewares/authorize.middleware.js";
 import { validateRequest } from "../../middlewares/validate.middleware.js";
 
 const validationDemoRoute = Router();
@@ -19,5 +22,6 @@ validationDemoRoute.get(
 );
 validationDemoRoute.get("/not-found", notFound);
 validationDemoRoute.get("/boom", boom);
+validationDemoRoute.get("/admin-only", authenticate, authorize("ADMIN"), adminOnly);
 
 export default validationDemoRoute;

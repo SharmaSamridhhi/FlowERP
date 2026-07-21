@@ -1,14 +1,39 @@
-// Proves the seeding pipeline runs. Real seed data (demo users per role,
-// etc.) is added incrementally by the specs that own that data — starting
-// with FLO-011 (specs/FLO-011-auth-rbac.md), which seeds one user per role.
+// Seeds one demo user per role. Credentials are deliberately safe to
+// publish (per FLO-021's "test login credentials for all roles"
+// submission requirement) — never reuse SEED_USER_PASSWORD's default as
+// anything resembling a real production secret.
 
-import { PrismaClient } from "../src/generated/prisma/client.js";
+import { prisma } from "../src/lib/prisma.js";
+import { hashPassword } from "../src/services/user.service.js";
 
-const prisma = new PrismaClient();
+const DEFAULT_SEED_PASSWORD = "FlowERP123!";
+const SEED_PASSWORD = process.env.SEED_USER_PASSWORD ?? DEFAULT_SEED_PASSWORD;
+
+const DEMO_USERS = [
+  { name: "Admin User", email: "admin@flowerp.test", role: "ADMIN" as const },
+  { name: "Sales User", email: "sales@flowerp.test", role: "SALES" as const },
+  { name: "Warehouse User", email: "warehouse@flowerp.test", role: "WAREHOUSE" as const },
+  { name: "Accounts User", email: "accounts@flowerp.test", role: "ACCOUNTS" as const },
+];
 
 async function main(): Promise<void> {
   await prisma.$connect();
-  console.log("Seed pipeline connected to the database. Nothing to seed yet.");
+
+  const passwordHash = await hashPassword(SEED_PASSWORD);
+
+  for (const demoUser of DEMO_USERS) {
+    await prisma.user.upsert({
+      where: { email: demoUser.email },
+      update: { name: demoUser.name, role: demoUser.role, passwordHash },
+      create: { ...demoUser, passwordHash },
+    });
+  }
+
+  console.log(`Seeded ${DEMO_USERS.length} demo users:`);
+  for (const demoUser of DEMO_USERS) {
+    console.log(`  ${demoUser.role.padEnd(10)} ${demoUser.email}`);
+  }
+  console.log(`Password (all accounts): ${SEED_PASSWORD}`);
 }
 
 main()

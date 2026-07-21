@@ -1,9 +1,9 @@
 name: CI
 
 # Verifies every PR and every push to main: lint, type-check, tests (with
-# coverage), and build. No deploy step here — see
-# specs/FLO-022-cd-automation.md for that; keeping CI (verify) and CD
-# (ship) separate is deliberate.
+# coverage, against a real Postgres service container) and build. No
+# deploy step here — see specs/FLO-022-cd-automation.md for that; keeping
+# CI (verify) and CD (ship) separate is deliberate.
 #
 # Recommended: enable branch protection on `main` requiring this workflow
 # to pass before merging. That's a GitHub repository setting, not
@@ -17,13 +17,28 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: flowerp_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     env:
-      # backend's postinstall runs `prisma generate`, which loads
-      # prisma.config.ts and requires DATABASE_URL to be a syntactically
-      # valid value even though `generate` never actually connects to a
-      # database (only `migrate`/real queries do). No Postgres service
-      # container needed here — see specs/FLO-010-ci-pipeline.md's scope.
-      DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
+      # Backend integration tests run against this real, ephemeral
+      # database (see specs/FLO-011-auth-rbac.md) — never mocked.
+      # DATABASE_URL also satisfies what backend's postinstall (`prisma
+      # generate`) needs to load its config.
+      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/flowerp_ci"
+      TEST_DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/flowerp_ci"
+      JWT_SECRET: "ci-jwt-secret-not-for-production-use"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -39,6 +54,9 @@ jobs:
         # generates the backend's Prisma client (backend's "postinstall"
         # script) — both required by the steps below.
         run: npm ci
+
+      - name: Apply database migrations
+        run: npm run db:migrate:deploy -w backend
 
       - name: Lint
         run: npm run lint
