@@ -6,6 +6,7 @@ import App from "./App";
 import "./index.css";
 import { AuthProvider } from "./lib/auth-context";
 import { queryClient } from "./lib/query-client";
+import { ToastProvider } from "./lib/toast-context";
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {
@@ -17,7 +18,9 @@ createRoot(rootElement).render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>
-          <App />
+          <ToastProvider>
+            <App />
+          </ToastProvider>
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
