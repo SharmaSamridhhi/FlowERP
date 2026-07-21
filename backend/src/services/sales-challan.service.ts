@@ -12,6 +12,7 @@ import type {
   SalesChallanItem as PrismaSalesChallanItem,
 } from "../generated/prisma/client.js";
 import { prisma } from "../lib/prisma.js";
+import { createWithUniqueDocumentNumber } from "../utils/document-number.js";
 import { ConflictError, NotFoundError } from "../utils/errors.js";
 import { recordMovement } from "./stock-movement.service.js";
 
@@ -54,28 +55,15 @@ function toChallanWithItemsResponse(challan: ChallanWithItems): SalesChallanWith
   };
 }
 
-const CHALLAN_NUMBER_MAX_ATTEMPTS = 5;
-
-// Date-scoped sequence (CH-2026-000123), generated optimistically from the
-// current max and relying on challanNumber's unique constraint (FLO-004) as
-// the actual race guard: a collision under concurrent creates surfaces as
-// Prisma's P2002, which createChallan retries with a freshly-read number.
-// This is the "unique constraint + retry" strategy named as acceptable in
-// specs/FLO-015-sales-challan-backend.md's Implementation Notes (the
-// alternative being a DB sequence, not used here to avoid a schema
-// migration for a single counter).
-async function generateNextChallanNumber(): Promise<string> {
-  const year = new Date().getFullYear();
-  const prefix = `CH-${year}-`;
-
+// Race-safe "unique constraint + retry" numbering, shared with FLO-017's
+// purchase orders via backend/src/utils/document-number.ts.
+async function findLatestChallanNumber(prefix: string): Promise<string | null> {
   const latest = await prisma.salesChallan.findFirst({
     where: { challanNumber: { startsWith: prefix } },
     orderBy: { challanNumber: "desc" },
     select: { challanNumber: true },
   });
-
-  const nextSeq = latest ? Number.parseInt(latest.challanNumber.slice(prefix.length), 10) + 1 : 1;
-  return `${prefix}${String(nextSeq).padStart(6, "0")}`;
+  return latest?.challanNumber ?? null;
 }
 
 async function findProductsOrThrow(productIds: string[]) {
@@ -112,10 +100,12 @@ export async function createChallan(
     };
   });
 
-  for (let attempt = 0; attempt < CHALLAN_NUMBER_MAX_ATTEMPTS; attempt++) {
-    const challanNumber = await generateNextChallanNumber();
-    try {
-      const challan = await prisma.salesChallan.create({
+  const year = new Date().getFullYear();
+  const challan = await createWithUniqueDocumentNumber({
+    prefix: `CH-${year}-`,
+    findLatestNumber: findLatestChallanNumber,
+    attemptInsert: (challanNumber) =>
+      prisma.salesChallan.create({
         data: {
           challanNumber,
           customerId: data.customerId,
@@ -124,19 +114,9 @@ export async function createChallan(
           items: { create: itemsCreate },
         },
         include: CHALLAN_DETAIL_INCLUDE,
-      });
-      return toChallanWithItemsResponse(challan);
-    } catch (err) {
-      const isChallanNumberConflict =
-        err instanceof Error && "code" in err && (err as { code: unknown }).code === "P2002";
-      if (isChallanNumberConflict && attempt < CHALLAN_NUMBER_MAX_ATTEMPTS - 1) {
-        continue;
-      }
-      throw err;
-    }
-  }
-  /* istanbul ignore next -- unreachable: the loop above always returns or throws */
-  throw new Error("Could not generate a unique challan number");
+      }),
+  });
+  return toChallanWithItemsResponse(challan);
 }
 
 export async function listChallans(
