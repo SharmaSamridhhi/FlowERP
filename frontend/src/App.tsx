@@ -17,6 +17,7 @@ import ProductsListPage from "./pages/products/ProductsListPage";
 import PurchaseOrderBuilderPage from "./pages/purchase-orders/PurchaseOrderBuilderPage";
 import PurchaseOrderDetailPage from "./pages/purchase-orders/PurchaseOrderDetailPage";
 import PurchaseOrdersListPage from "./pages/purchase-orders/PurchaseOrdersListPage";
+import StockMovementsPage from "./pages/StockMovementsPage";
 import { AppLayout } from "./routing/AppLayout";
 import { ProtectedRoute } from "./routing/ProtectedRoute";
 import { RequireRole } from "./routing/RequireRole";
@@ -40,6 +41,7 @@ function App() {
             <Route path="/products/:id/edit" element={<ProductFormPage />} />
           </Route>
           <Route path="/products/:id" element={<ProductDetailPage />} />
+          <Route path="/stock-movements" element={<StockMovementsPage />} />
           <Route path="/challans" element={<ChallansListPage />} />
           <Route element={<RequireRole roles={WRITE_ROLES.challans} />}>
             <Route path="/challans/new" element={<ChallanBuilderPage />} />
