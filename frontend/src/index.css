@@ -1,4 +1,7 @@
 @import "tailwindcss";
+/* Self-hosted (bundled at build time, no runtime request to Google Fonts)
+ * variable-weight Inter — covers latin/cyrillic/greek/vietnamese. */
+@import "@fontsource-variable/inter";
 
 /*
  * Design tokens (FLO-009). Tailwind v4 uses CSS-first configuration via
@@ -13,6 +16,14 @@
  * to brand) so it stays visually distinct from the amber "warning" variant.
  */
 @theme {
+  /* App-wide font — overrides Tailwind Preflight's default font-family var
+   * entirely, so the system-font fallback chain is repeated here rather
+   * than assumed. */
+  --default-font-family:
+    "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    "Noto Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+    "Noto Color Emoji";
+
   --color-brand-50: #fdf6e9;
   --color-brand-100: #faead0;
   --color-brand-200: #f2d19d;
@@ -23,6 +34,25 @@
   --color-brand-700: #8f591b;
   --color-brand-800: #74481c;
   --color-brand-900: #603c1b;
+
+  --animate-scroll-products: scroll-products 20s linear infinite;
+}
+
+@keyframes scroll-products {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+/* Respect the OS-level motion preference rather than forcing the ticker
+ * on everyone. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-scroll-products {
+    animation: none;
+  }
 }
 
 html,

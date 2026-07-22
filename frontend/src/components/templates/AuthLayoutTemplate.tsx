@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { PackageBoxLogoIcon, ShieldIcon, TrendingUpIcon } from "../atoms/icons";
+import { BrandCredit } from "../molecules/BrandCredit";
 
 export interface AuthLayoutTemplateProps {
   title: string;
@@ -12,7 +13,14 @@ const TOP_PRODUCTS = [
   { name: "Copper Fittings XL-40", sku: "IND-4022", value: "1,240", delta: "+14%" },
   { name: "Poly-Storage Bin 20L", sku: "WH-BIN-20", value: "892", delta: "+8%" },
   { name: "Steel Fastener Set", sku: "MT-FAST-9", value: "755", delta: "Steady" },
+  { name: "PVC Conduit Pipe 2m", sku: "ELE-PVC-2M", value: "640", delta: "+5%" },
+  { name: "LED Strip Light 5m", sku: "ELE-LED-5M", value: "410", delta: "+22%" },
+  { name: "Brass Ball Valve 1in", sku: "PLM-VALVE-1", value: "305", delta: "+3%" },
 ];
+
+// Rendered twice back-to-back so the scroll-products keyframe (translateY
+// to -50%) loops seamlessly — the list appears to never end.
+const TICKER_ITEMS = [...TOP_PRODUCTS, ...TOP_PRODUCTS];
 
 // Split-screen auth shell: left = form slot (this app's actual login form),
 // right = static marketing panel. The panel's "live" numbers are
@@ -45,6 +53,10 @@ export function AuthLayoutTemplate({ title, subtitle, children, footer }: AuthLa
               <ShieldIcon className="h-3.5 w-3.5" /> 256-bit Encryption
             </span>
           </div>
+
+          <div className="mt-4">
+            <BrandCredit />
+          </div>
         </div>
       </div>
 
@@ -65,32 +77,44 @@ export function AuthLayoutTemplate({ title, subtitle, children, footer }: AuthLa
                 <TrendingUpIcon className="text-brand-600 h-4 w-4" />
                 Top Moving Products
               </span>
-              <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-500 opacity-75" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-blue-600" />
+                </span>
                 Live
               </span>
             </div>
-            <ul className="divide-y divide-slate-100">
-              {TOP_PRODUCTS.map((product) => (
-                <li key={product.sku} className="flex items-center justify-between py-2.5 text-sm">
-                  <div>
-                    <p className="font-medium text-slate-800">{product.name}</p>
-                    <p className="text-xs text-slate-400">SKU: {product.sku}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-slate-900">{product.value}</p>
-                    <p
-                      className={
-                        product.delta === "Steady"
-                          ? "text-brand-600 text-xs font-medium"
-                          : "text-xs font-medium text-green-600"
-                      }
-                    >
-                      {product.delta}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            <div
+              className="relative h-[172px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,black_30%,black_65%,transparent_97%)]"
+              aria-hidden="true"
+            >
+              <ul className="animate-scroll-products absolute inset-x-0 top-0 divide-y divide-slate-100">
+                {TICKER_ITEMS.map((product, index) => (
+                  <li
+                    key={`${product.sku}-${index}`}
+                    className="flex items-center justify-between py-2.5 text-sm"
+                  >
+                    <div>
+                      <p className="font-medium text-slate-800">{product.name}</p>
+                      <p className="text-xs text-slate-400">SKU: {product.sku}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-slate-900">{product.value}</p>
+                      <p
+                        className={
+                          product.delta === "Steady"
+                            ? "text-brand-600 text-xs font-medium"
+                            : "text-xs font-medium text-green-600"
+                        }
+                      >
+                        {product.delta}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
 
           <div className="mt-8 grid grid-cols-3 gap-4 text-center text-white">

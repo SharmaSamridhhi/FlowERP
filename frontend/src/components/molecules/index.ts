@@ -1,5 +1,6 @@
 export * from "./FormField";
 export * from "./Modal";
+export * from "./BrandCredit";
 export * from "./Pagination";
 export * from "./ProductImage";
 export * from "./SearchBar";

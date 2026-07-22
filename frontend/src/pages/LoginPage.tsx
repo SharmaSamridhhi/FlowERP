@@ -16,8 +16,8 @@ function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("admin@flowerp.test");
+  const [password, setPassword] = useState("FlowERP123!");
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -81,6 +81,18 @@ function LoginPage() {
         <Button type="submit" isLoading={isSubmitting} className="w-full">
           Log in
         </Button>
+        <p className="text-center text-xs text-slate-500">
+          Need login credentials? Find them in the{" "}
+          <a
+            href="https://github.com/SharmaSamridhhi/FlowERP#readme"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-brand-600 hover:underline"
+          >
+            project README
+          </a>
+          .
+        </p>
       </form>
     </AuthLayoutTemplate>
   );

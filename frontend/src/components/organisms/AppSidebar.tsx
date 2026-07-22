@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { NavLink } from "react-router-dom";
 import { PackageBoxLogoIcon } from "../atoms/icons";
+import { BrandCredit } from "../molecules/BrandCredit";
 
 export interface NavItem {
   label: string;
@@ -52,6 +53,10 @@ export function AppSidebar({ role, navItems, onNavigate }: AppSidebarProps) {
           </NavLink>
         ))}
       </nav>
+
+      <div className="mt-auto border-t border-slate-100 px-5 py-3">
+        <BrandCredit />
+      </div>
     </aside>
   );
 }
