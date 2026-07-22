@@ -36,13 +36,8 @@ export async function createProduct(data: CreateProductInput): Promise<Product> 
 export async function listProducts(
   query: ListProductsQuery,
 ): Promise<{ items: Product[]; total: number }> {
-  const { page, limit, search, category, lowStock } = query;
+  const { page, limit, search, category, lowStock, stockStatus } = query;
 
-  // Prisma has no fluent way to compare two columns of the same row
-  // (currentStock vs. minStockAlertQuantity), so the low-stock filter is
-  // resolved to a concrete id list via one raw query, then composed into
-  // the normal `where` alongside search/category so pagination/count stay
-  // correct.
   const lowStockIds = lowStock
     ? (
         await prisma.$queryRaw<
@@ -62,6 +57,8 @@ export async function listProducts(
       : {}),
     ...(category ? { category: { contains: category, mode: "insensitive" } } : {}),
     ...(lowStockIds ? { id: { in: lowStockIds } } : {}),
+    ...(stockStatus === "in_stock" ? { currentStock: { gt: 0 } } : {}),
+    ...(stockStatus === "out_of_stock" ? { currentStock: { lte: 0 } } : {}),
   };
 
   const [items, total] = await Promise.all([
