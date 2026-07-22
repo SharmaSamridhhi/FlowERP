@@ -18,6 +18,7 @@ function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -29,7 +30,7 @@ function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      await login(email, password);
+      await login(email, password, remember);
       navigate(from, { replace: true });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Something went wrong. Please try again.");
@@ -39,12 +40,16 @@ function LoginPage() {
   }
 
   return (
-    <AuthLayoutTemplate title="Log in to FlowERP">
+    <AuthLayoutTemplate
+      title="Welcome Back"
+      subtitle="Manage your wholesale distribution operations with ease"
+    >
       <form onSubmit={(event) => void handleSubmit(event)} className="flex flex-col gap-4">
-        <FormField label="Email" htmlFor="email">
+        <FormField label="Email Address" htmlFor="email">
           <Input
             type="email"
             autoComplete="email"
+            placeholder="name@company.com"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             required
@@ -59,6 +64,15 @@ function LoginPage() {
             required
           />
         </FormField>
+        <label className="flex items-center gap-2 text-sm text-slate-600">
+          <input
+            type="checkbox"
+            checked={remember}
+            onChange={(event) => setRemember(event.target.checked)}
+            className="text-brand-600 focus:ring-brand-500 h-4 w-4 rounded border-slate-300"
+          />
+          Stay logged in for 30 days
+        </label>
         {error && (
           <p role="alert" className="text-sm text-red-600">
             {error}
