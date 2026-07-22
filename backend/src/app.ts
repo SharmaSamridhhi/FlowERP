@@ -6,6 +6,7 @@ import { errorHandler } from "./middlewares/error-handler.middleware.js";
 import { notFoundHandler } from "./middlewares/not-found.middleware.js";
 import authRoute from "./routes/auth.route.js";
 import customersRoute from "./routes/customers.route.js";
+import dashboardRoute from "./routes/dashboard.route.js";
 import healthRoute from "./routes/health.route.js";
 import validationDemoRoute from "./routes/internal/validation-demo.route.js";
 import productsRoute from "./routes/products.route.js";
@@ -35,6 +36,7 @@ if (env.nodeEnv !== "test") {
 
 app.use("/health", healthRoute);
 app.use("/auth", authRoute);
+app.use("/dashboard", dashboardRoute);
 app.use("/customers", customersRoute);
 app.use("/products", productsRoute);
 app.use("/challans", salesChallansRoute);
