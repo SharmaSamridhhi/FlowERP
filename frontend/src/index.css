@@ -6,21 +6,23 @@
  * equivalent of what FLO-009's spec describes as "Design tokens in
  * tailwind.config.ts".
  *
- * Deliberately small: a brand color scale (semantic alias over a blue
- * palette, so the brand color is a one-place edit later) plus the neutral
- * palette, spacing, and typography scales Tailwind already ships by
- * default and this project has no need to override yet. Status colors
- * (Badge variants) use Tailwind's built-in green/amber/red/slate directly
- * rather than inventing a parallel "status" token set.
+ * Brand color scale (semantic alias, one-place edit) — amber/gold to match
+ * the FlowERP product design. Status colors (Badge variants) use Tailwind's
+ * built-in green/amber/red/slate/blue directly rather than inventing a
+ * parallel "status" token set; "info" is intentionally kept blue (not tied
+ * to brand) so it stays visually distinct from the amber "warning" variant.
  */
 @theme {
-  --color-brand-50: #eff6ff;
-  --color-brand-100: #dbeafe;
-  --color-brand-200: #bfdbfe;
-  --color-brand-500: #3b82f6;
-  --color-brand-600: #2563eb;
-  --color-brand-700: #1d4ed8;
-  --color-brand-900: #1e3a8a;
+  --color-brand-50: #fdf6e9;
+  --color-brand-100: #faead0;
+  --color-brand-200: #f2d19d;
+  --color-brand-300: #e8b768;
+  --color-brand-400: #dd9f42;
+  --color-brand-500: #d1892a;
+  --color-brand-600: #b06f1f;
+  --color-brand-700: #8f591b;
+  --color-brand-800: #74481c;
+  --color-brand-900: #603c1b;
 }
 
 html,
