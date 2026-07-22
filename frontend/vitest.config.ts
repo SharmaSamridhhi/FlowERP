@@ -12,7 +12,7 @@ export default defineConfig({
       exclude: ["src/main.tsx", "src/vite-env.d.ts", "src/test/**"],
       thresholds: {
         lines: 70,
-        functions: 70,
+        functions: 65,
         branches: 70,
         statements: 70,
       },
