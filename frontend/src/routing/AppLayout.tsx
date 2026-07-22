@@ -1,16 +1,23 @@
 import { Outlet } from "react-router-dom";
 import type { NavItem } from "../components/organisms";
 import { AppShellTemplate } from "../components/templates";
+import {
+  BoxIcon,
+  DocumentIcon,
+  GridIcon,
+  MovementsIcon,
+  UsersIcon,
+} from "../components/atoms/icons";
 import { useAuth } from "../lib/auth-context";
+import { ROLE_LABELS } from "../lib/permissions";
 
-// Stub nav items — real per-module routes arrive as each Phase 3 module
-// is built; role-based filtering already applies (see AppSidebar).
 const NAV_ITEMS: NavItem[] = [
-  { label: "Dashboard", to: "/" },
-  { label: "Customers", to: "/customers" },
-  { label: "Products", to: "/products" },
-  { label: "Sales challans", to: "/challans" },
-  { label: "Purchase orders", to: "/purchase-orders" },
+  { label: "Dashboard", to: "/", icon: <GridIcon /> },
+  { label: "Customer Management", to: "/customers", icon: <UsersIcon /> },
+  { label: "Product Inventory", to: "/products", icon: <BoxIcon /> },
+  { label: "Stock Movements", to: "/stock-movements", icon: <MovementsIcon /> },
+  { label: "Sales Challans", to: "/challans", icon: <DocumentIcon /> },
+  { label: "Purchase Orders", to: "/purchase-orders", icon: <DocumentIcon /> },
 ];
 
 // Wraps every authenticated route (mounted inside ProtectedRoute in
@@ -23,6 +30,7 @@ export function AppLayout() {
       role={user?.role ?? null}
       navItems={NAV_ITEMS}
       userName={user?.name}
+      roleLabel={user ? ROLE_LABELS[user.role] : undefined}
       onLogout={logout}
     >
       <Outlet />

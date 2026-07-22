@@ -9,6 +9,7 @@ export interface AppShellTemplateProps {
   role: string | null;
   navItems: NavItem[];
   userName?: string;
+  roleLabel?: string;
   onLogout?: () => void;
   children: ReactNode;
 }
@@ -21,6 +22,7 @@ export function AppShellTemplate({
   role,
   navItems,
   userName,
+  roleLabel,
   onLogout,
   children,
 }: AppShellTemplateProps) {
@@ -45,7 +47,7 @@ export function AppShellTemplate({
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <AppHeader userName={userName} onLogout={onLogout}>
+        <AppHeader userName={userName} roleLabel={roleLabel} onLogout={onLogout}>
           <IconButton
             icon={<span aria-hidden="true">☰</span>}
             label="Toggle navigation"

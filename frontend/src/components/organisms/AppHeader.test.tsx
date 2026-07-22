@@ -22,6 +22,6 @@ describe("AppHeader", () => {
   it("does not render a log out button when onLogout is not provided", () => {
     render(<AppHeader userName="Priya Sharma" />);
 
-    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Log out" })).not.toBeInTheDocument();
   });
 });
