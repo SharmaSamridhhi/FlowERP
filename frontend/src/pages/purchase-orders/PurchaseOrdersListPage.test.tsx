@@ -5,18 +5,31 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import * as apiClient from "../../lib/api-client";
+import { AuthContext } from "../../lib/auth-context";
 import PurchaseOrdersListPage from "./PurchaseOrdersListPage";
 
-function renderPage(initialEntry = "/purchase-orders") {
+function renderPage(
+  role: "ADMIN" | "SALES" | "WAREHOUSE" | "ACCOUNTS" = "ADMIN",
+  initialEntry = "/purchase-orders",
+) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={[initialEntry]}>
-        <Routes>
-          <Route path="/purchase-orders" element={<PurchaseOrdersListPage />} />
-          <Route path="/purchase-orders/new" element={<p>New PO page</p>} />
-        </Routes>
-      </MemoryRouter>
+      <AuthContext.Provider
+        value={{
+          user: { id: "user-1", name: "Test User", email: "test@flowerp.test", role },
+          isInitializing: false,
+          login: vi.fn(),
+          logout: vi.fn(),
+        }}
+      >
+        <MemoryRouter initialEntries={[initialEntry]}>
+          <Routes>
+            <Route path="/purchase-orders" element={<PurchaseOrdersListPage />} />
+            <Route path="/purchase-orders/new" element={<p>New PO page</p>} />
+          </Routes>
+        </MemoryRouter>
+      </AuthContext.Provider>
     </QueryClientProvider>,
   );
 }
@@ -93,6 +106,22 @@ describe("PurchaseOrdersListPage", () => {
     await userEvent.click(screen.getByRole("button", { name: "New Purchase Order" }));
 
     await waitFor(() => expect(screen.getByText("New PO page")).toBeInTheDocument());
+
+    vi.restoreAllMocks();
+  });
+
+  it("disables (not hides) New Purchase Order for a role that can't write POs, with an explanation", async () => {
+    vi.spyOn(apiClient, "apiRequest").mockResolvedValue({
+      data: [],
+      meta: { pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } },
+    });
+
+    renderPage("SALES");
+
+    await waitFor(() => expect(screen.getByText("No purchase orders found.")).toBeInTheDocument());
+    const addButton = screen.getByRole("button", { name: "New Purchase Order" });
+    expect(addButton).toBeDisabled();
+    expect(addButton).toHaveAttribute("title", "Only Admin and Warehouse can do this.");
 
     vi.restoreAllMocks();
   });

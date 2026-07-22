@@ -13,18 +13,13 @@ import { FormField, Modal } from "../../components/molecules";
 import { StockMovementLog } from "../../components/organisms";
 import { ApiError } from "../../lib/api-client";
 import { useAuth } from "../../lib/auth-context";
+import { canWrite, writeDeniedTitle } from "../../lib/permissions";
 import { useToast } from "../../lib/toast-context";
 
 const MOVEMENT_TYPE_OPTIONS = [
   { value: "IN", label: "IN" },
   { value: "OUT", label: "OUT" },
 ];
-
-// Roles permitted to record a manual stock adjustment (see
-// specs/FLO-014-stock-movement-ledger.md's Implementation Notes) — mirrors
-// FLO-013's product create/edit role matrix, since warehouse owns
-// day-to-day stock corrections and admin oversees it.
-const CAN_ADJUST_STOCK_ROLES = new Set(["ADMIN", "WAREHOUSE"]);
 
 function DetailField({ label, value }: { label: string; value: ReactNode }) {
   return (
@@ -137,7 +132,7 @@ function ProductDetailPage() {
   }
 
   const product = productQuery.data.data;
-  const canAdjustStock = Boolean(user?.role && CAN_ADJUST_STOCK_ROLES.has(user.role));
+  const canWriteProducts = canWrite(user?.role, "products");
 
   return (
     <div className="flex flex-col gap-6">
@@ -147,12 +142,21 @@ function ProductDetailPage() {
           <p className="text-sm text-slate-500">{product.sku}</p>
         </div>
         <div className="flex gap-2">
-          {canAdjustStock && (
-            <Button variant="secondary" onClick={() => setIsAdjustModalOpen(true)}>
-              Adjust Stock
-            </Button>
-          )}
-          <Button onClick={() => navigate(`/products/${product.id}/edit`)}>Edit</Button>
+          <Button
+            variant="secondary"
+            onClick={() => setIsAdjustModalOpen(true)}
+            disabled={!canWriteProducts}
+            title={canWriteProducts ? undefined : writeDeniedTitle("products")}
+          >
+            Adjust Stock
+          </Button>
+          <Button
+            onClick={() => navigate(`/products/${product.id}/edit`)}
+            disabled={!canWriteProducts}
+            title={canWriteProducts ? undefined : writeDeniedTitle("products")}
+          >
+            Edit
+          </Button>
         </div>
       </div>
 
@@ -188,13 +192,11 @@ function ProductDetailPage() {
         <StockMovementLog productId={product.id} />
       </section>
 
-      {canAdjustStock && (
-        <StockAdjustmentModal
-          productId={product.id}
-          isOpen={isAdjustModalOpen}
-          onClose={() => setIsAdjustModalOpen(false)}
-        />
-      )}
+      <StockAdjustmentModal
+        productId={product.id}
+        isOpen={isAdjustModalOpen}
+        onClose={() => setIsAdjustModalOpen(false)}
+      />
     </div>
   );
 }

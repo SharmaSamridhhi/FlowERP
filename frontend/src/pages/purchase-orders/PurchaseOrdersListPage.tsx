@@ -7,6 +7,8 @@ import { Badge, Button, Select } from "../../components/atoms";
 import { Pagination, SearchBar } from "../../components/molecules";
 import { DataTable } from "../../components/organisms";
 import type { DataTableColumn } from "../../components/organisms";
+import { useAuth } from "../../lib/auth-context";
+import { canWrite, writeDeniedTitle } from "../../lib/permissions";
 
 const STATUS_FILTER_OPTIONS = [
   { value: "", label: "All statuses" },
@@ -30,6 +32,8 @@ const SEARCH_DEBOUNCE_MS = 300;
 // supplier name server-side.
 function PurchaseOrdersListPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const canAdd = canWrite(user?.role, "purchaseOrders");
   const [searchParams, setSearchParams] = useSearchParams();
 
   const page = Number(searchParams.get("page") ?? "1");
@@ -133,7 +137,13 @@ function PurchaseOrdersListPage() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-semibold text-slate-900">Purchase Orders</h1>
-        <Button onClick={() => navigate("/purchase-orders/new")}>New Purchase Order</Button>
+        <Button
+          onClick={() => navigate("/purchase-orders/new")}
+          disabled={!canAdd}
+          title={canAdd ? undefined : writeDeniedTitle("purchaseOrders")}
+        >
+          New Purchase Order
+        </Button>
       </div>
 
       <div className="flex flex-wrap items-start gap-3">

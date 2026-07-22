@@ -19,6 +19,7 @@ function renderPage(
       <AuthContext.Provider
         value={{
           user: { id: "user-1", name: "Test User", email: "test@flowerp.test", role },
+          isInitializing: false,
           login: vi.fn(),
           logout: vi.fn(),
         }}
@@ -75,7 +76,7 @@ describe("ChallanDetailPage", () => {
     vi.restoreAllMocks();
   });
 
-  it("shows Edit/Confirm/Cancel for a Draft when the role can manage challans", async () => {
+  it("shows Edit/Confirm/Cancel enabled for a Draft when the role can manage challans", async () => {
     vi.spyOn(apiClient, "apiRequest").mockResolvedValue({
       data: buildChallan({ status: "DRAFT" }),
     });
@@ -83,14 +84,14 @@ describe("ChallanDetailPage", () => {
     renderPage("SALES");
 
     await waitFor(() => expect(screen.getByText("CH-2026-000001")).toBeInTheDocument());
-    expect(screen.getByRole("button", { name: "Edit" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Confirm" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Cancel Challan" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Edit" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Confirm" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Cancel Challan" })).toBeEnabled();
 
     vi.restoreAllMocks();
   });
 
-  it("shows only Cancel for a Confirmed challan", async () => {
+  it("shows only Cancel for a Confirmed challan — Edit/Confirm aren't valid in that state for anyone", async () => {
     vi.spyOn(apiClient, "apiRequest").mockResolvedValue({
       data: buildChallan({ status: "CONFIRMED" }),
     });
@@ -100,12 +101,12 @@ describe("ChallanDetailPage", () => {
     await waitFor(() => expect(screen.getByText("CH-2026-000001")).toBeInTheDocument());
     expect(screen.queryByRole("button", { name: "Edit" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Confirm" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Cancel Challan" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Cancel Challan" })).toBeEnabled();
 
     vi.restoreAllMocks();
   });
 
-  it("shows no management actions for a Cancelled challan", async () => {
+  it("shows no management actions for a Cancelled challan — none are valid in that state for anyone", async () => {
     vi.spyOn(apiClient, "apiRequest").mockResolvedValue({
       data: buildChallan({ status: "CANCELLED" }),
     });
@@ -121,7 +122,7 @@ describe("ChallanDetailPage", () => {
   });
 
   it.each(["WAREHOUSE", "ACCOUNTS"] as const)(
-    "hides all management actions for %s regardless of status",
+    "shows Edit/Confirm/Cancel as disabled (not hidden) for %s on a Draft challan, with an explanation",
     async (role) => {
       vi.spyOn(apiClient, "apiRequest").mockResolvedValue({
         data: buildChallan({ status: "DRAFT" }),
@@ -130,9 +131,14 @@ describe("ChallanDetailPage", () => {
       renderPage(role);
 
       await waitFor(() => expect(screen.getByText("CH-2026-000001")).toBeInTheDocument());
-      expect(screen.queryByRole("button", { name: "Edit" })).not.toBeInTheDocument();
-      expect(screen.queryByRole("button", { name: "Confirm" })).not.toBeInTheDocument();
-      expect(screen.queryByRole("button", { name: "Cancel Challan" })).not.toBeInTheDocument();
+      const editButton = screen.getByRole("button", { name: "Edit" });
+      const confirmButton = screen.getByRole("button", { name: "Confirm" });
+      const cancelButton = screen.getByRole("button", { name: "Cancel Challan" });
+
+      expect(editButton).toBeDisabled();
+      expect(confirmButton).toBeDisabled();
+      expect(cancelButton).toBeDisabled();
+      expect(editButton).toHaveAttribute("title", "Only Admin and Sales can do this.");
 
       vi.restoreAllMocks();
     },

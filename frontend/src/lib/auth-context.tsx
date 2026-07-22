@@ -16,22 +16,43 @@ import { apiRequest, configureAuthTokenGetter } from "./api-client";
 
 export interface AuthContextValue {
   user: AuthUser | null;
+  isInitializing: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-// Token lives in memory only (a ref, not state — it doesn't need to
-// trigger re-renders) rather than localStorage, to avoid a
-// persistent, XSS-exfiltrable token. Tradeoff: a hard refresh loses the
-// session. See specs/FLO-011-auth-rbac.md's Implementation Notes.
+const TOKEN_STORAGE_KEY = "flowerp_token";
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [isInitializing, setIsInitializing] = useState(
+    () => sessionStorage.getItem(TOKEN_STORAGE_KEY) !== null,
+  );
   const tokenRef = useRef<string | null>(null);
 
   useEffect(() => {
     configureAuthTokenGetter(() => tokenRef.current);
+  }, []);
+
+  useEffect(() => {
+    const storedToken = sessionStorage.getItem(TOKEN_STORAGE_KEY);
+    if (!storedToken) {
+      return;
+    }
+
+    tokenRef.current = storedToken;
+    apiRequest<AuthUser>("/auth/me")
+      .then((response) => {
+        setUser(response.data);
+      })
+      .catch(() => {
+        tokenRef.current = null;
+        sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+      })
+      .finally(() => {
+        setIsInitializing(false);
+      });
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
@@ -40,15 +61,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       body: { email, password },
     });
     tokenRef.current = response.data.token;
+    sessionStorage.setItem(TOKEN_STORAGE_KEY, response.data.token);
     setUser(response.data.user);
   }, []);
 
   const logout = useCallback(() => {
     tokenRef.current = null;
+    sessionStorage.removeItem(TOKEN_STORAGE_KEY);
     setUser(null);
   }, []);
 
-  const value = useMemo<AuthContextValue>(() => ({ user, login, logout }), [user, login, logout]);
+  const value = useMemo<AuthContextValue>(
+    () => ({ user, isInitializing, login, logout }),
+    [user, isInitializing, login, logout],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

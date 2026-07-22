@@ -21,6 +21,7 @@ describe("App", () => {
   it("renders the dashboard through the real app shell when authenticated", () => {
     const value: AuthContextValue = {
       user: { id: "1", name: "Admin User", email: "admin@flowerp.test", role: "ADMIN" },
+      isInitializing: false,
       login: vi.fn(),
       logout: vi.fn(),
     };

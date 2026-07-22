@@ -5,18 +5,31 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import * as apiClient from "../../lib/api-client";
+import { AuthContext } from "../../lib/auth-context";
 import ProductsListPage from "./ProductsListPage";
 
-function renderPage(initialEntry = "/products") {
+function renderPage(
+  role: "ADMIN" | "SALES" | "WAREHOUSE" | "ACCOUNTS" = "ADMIN",
+  initialEntry = "/products",
+) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={[initialEntry]}>
-        <Routes>
-          <Route path="/products" element={<ProductsListPage />} />
-          <Route path="/products/new" element={<p>Add product page</p>} />
-        </Routes>
-      </MemoryRouter>
+      <AuthContext.Provider
+        value={{
+          user: { id: "user-1", name: "Test User", email: "test@flowerp.test", role },
+          isInitializing: false,
+          login: vi.fn(),
+          logout: vi.fn(),
+        }}
+      >
+        <MemoryRouter initialEntries={[initialEntry]}>
+          <Routes>
+            <Route path="/products" element={<ProductsListPage />} />
+            <Route path="/products/new" element={<p>Add product page</p>} />
+          </Routes>
+        </MemoryRouter>
+      </AuthContext.Provider>
     </QueryClientProvider>,
   );
 }
@@ -98,6 +111,22 @@ describe("ProductsListPage", () => {
     await userEvent.click(screen.getByRole("button", { name: "Add Product" }));
 
     await waitFor(() => expect(screen.getByText("Add product page")).toBeInTheDocument());
+
+    vi.restoreAllMocks();
+  });
+
+  it("disables (not hides) Add Product for a role that can't write products, with an explanation", async () => {
+    vi.spyOn(apiClient, "apiRequest").mockResolvedValue({
+      data: [],
+      meta: { pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } },
+    });
+
+    renderPage("SALES");
+
+    await waitFor(() => expect(screen.getByText("No products found.")).toBeInTheDocument());
+    const addButton = screen.getByRole("button", { name: "Add Product" });
+    expect(addButton).toBeDisabled();
+    expect(addButton).toHaveAttribute("title", "Only Admin and Warehouse can do this.");
 
     vi.restoreAllMocks();
   });

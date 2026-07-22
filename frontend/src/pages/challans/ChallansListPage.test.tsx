@@ -5,18 +5,31 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import * as apiClient from "../../lib/api-client";
+import { AuthContext } from "../../lib/auth-context";
 import ChallansListPage from "./ChallansListPage";
 
-function renderPage(initialEntry = "/challans") {
+function renderPage(
+  role: "ADMIN" | "SALES" | "WAREHOUSE" | "ACCOUNTS" = "ADMIN",
+  initialEntry = "/challans",
+) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={[initialEntry]}>
-        <Routes>
-          <Route path="/challans" element={<ChallansListPage />} />
-          <Route path="/challans/new" element={<p>New challan page</p>} />
-        </Routes>
-      </MemoryRouter>
+      <AuthContext.Provider
+        value={{
+          user: { id: "user-1", name: "Test User", email: "test@flowerp.test", role },
+          isInitializing: false,
+          login: vi.fn(),
+          logout: vi.fn(),
+        }}
+      >
+        <MemoryRouter initialEntries={[initialEntry]}>
+          <Routes>
+            <Route path="/challans" element={<ChallansListPage />} />
+            <Route path="/challans/new" element={<p>New challan page</p>} />
+          </Routes>
+        </MemoryRouter>
+      </AuthContext.Provider>
     </QueryClientProvider>,
   );
 }
@@ -94,6 +107,22 @@ describe("ChallansListPage", () => {
     await userEvent.click(screen.getByRole("button", { name: "New Challan" }));
 
     await waitFor(() => expect(screen.getByText("New challan page")).toBeInTheDocument());
+
+    vi.restoreAllMocks();
+  });
+
+  it("disables (not hides) New Challan for a role that can't write challans, with an explanation", async () => {
+    vi.spyOn(apiClient, "apiRequest").mockResolvedValue({
+      data: [],
+      meta: { pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } },
+    });
+
+    renderPage("WAREHOUSE");
+
+    await waitFor(() => expect(screen.getByText("No sales challans found.")).toBeInTheDocument());
+    const addButton = screen.getByRole("button", { name: "New Challan" });
+    expect(addButton).toBeDisabled();
+    expect(addButton).toHaveAttribute("title", "Only Admin and Sales can do this.");
 
     vi.restoreAllMocks();
   });

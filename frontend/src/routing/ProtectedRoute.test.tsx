@@ -6,8 +6,11 @@ import { AuthContext } from "../lib/auth-context";
 import type { AuthContextValue } from "../lib/auth-context";
 import { ProtectedRoute } from "./ProtectedRoute";
 
-function renderProtected(user: AuthUser | null, initialPath = "/protected") {
-  const value: AuthContextValue = { user, login: vi.fn(), logout: vi.fn() };
+function renderProtected(
+  user: AuthUser | null,
+  { isInitializing = false, initialPath = "/protected" } = {},
+) {
+  const value: AuthContextValue = { user, isInitializing, login: vi.fn(), logout: vi.fn() };
 
   return render(
     <AuthContext.Provider value={value}>
@@ -24,6 +27,14 @@ function renderProtected(user: AuthUser | null, initialPath = "/protected") {
 }
 
 describe("ProtectedRoute", () => {
+  it("shows a loading state and does not redirect while the session is still being restored", () => {
+    renderProtected(null, { isInitializing: true });
+
+    expect(screen.getByRole("status", { name: "Restoring session" })).toBeInTheDocument();
+    expect(screen.queryByText("Login page")).not.toBeInTheDocument();
+    expect(screen.queryByText("Protected content")).not.toBeInTheDocument();
+  });
+
   it("redirects to /login when there is no user", () => {
     renderProtected(null);
 

@@ -1,4 +1,5 @@
 import { Route, Routes } from "react-router-dom";
+import { WRITE_ROLES } from "./lib/permissions";
 import HomePage from "./pages/HomePage";
 import ApiDemoPage from "./pages/internal/ApiDemoPage";
 import ComponentsPage from "./pages/internal/ComponentsPage";
@@ -18,6 +19,7 @@ import PurchaseOrderDetailPage from "./pages/purchase-orders/PurchaseOrderDetail
 import PurchaseOrdersListPage from "./pages/purchase-orders/PurchaseOrdersListPage";
 import { AppLayout } from "./routing/AppLayout";
 import { ProtectedRoute } from "./routing/ProtectedRoute";
+import { RequireRole } from "./routing/RequireRole";
 
 function App() {
   return (
@@ -27,20 +29,28 @@ function App() {
         <Route element={<AppLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/customers" element={<CustomersListPage />} />
-          <Route path="/customers/new" element={<CustomerFormPage />} />
-          <Route path="/customers/:id/edit" element={<CustomerFormPage />} />
+          <Route element={<RequireRole roles={WRITE_ROLES.customers} />}>
+            <Route path="/customers/new" element={<CustomerFormPage />} />
+            <Route path="/customers/:id/edit" element={<CustomerFormPage />} />
+          </Route>
           <Route path="/customers/:id" element={<CustomerDetailPage />} />
           <Route path="/products" element={<ProductsListPage />} />
-          <Route path="/products/new" element={<ProductFormPage />} />
-          <Route path="/products/:id/edit" element={<ProductFormPage />} />
+          <Route element={<RequireRole roles={WRITE_ROLES.products} />}>
+            <Route path="/products/new" element={<ProductFormPage />} />
+            <Route path="/products/:id/edit" element={<ProductFormPage />} />
+          </Route>
           <Route path="/products/:id" element={<ProductDetailPage />} />
           <Route path="/challans" element={<ChallansListPage />} />
-          <Route path="/challans/new" element={<ChallanBuilderPage />} />
-          <Route path="/challans/:id/edit" element={<ChallanBuilderPage />} />
+          <Route element={<RequireRole roles={WRITE_ROLES.challans} />}>
+            <Route path="/challans/new" element={<ChallanBuilderPage />} />
+            <Route path="/challans/:id/edit" element={<ChallanBuilderPage />} />
+          </Route>
           <Route path="/challans/:id" element={<ChallanDetailPage />} />
           <Route path="/purchase-orders" element={<PurchaseOrdersListPage />} />
-          <Route path="/purchase-orders/new" element={<PurchaseOrderBuilderPage />} />
-          <Route path="/purchase-orders/:id/edit" element={<PurchaseOrderBuilderPage />} />
+          <Route element={<RequireRole roles={WRITE_ROLES.purchaseOrders} />}>
+            <Route path="/purchase-orders/new" element={<PurchaseOrderBuilderPage />} />
+            <Route path="/purchase-orders/:id/edit" element={<PurchaseOrderBuilderPage />} />
+          </Route>
           <Route path="/purchase-orders/:id" element={<PurchaseOrderDetailPage />} />
         </Route>
       </Route>

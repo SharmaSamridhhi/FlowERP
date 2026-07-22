@@ -9,6 +9,8 @@ import { addFollowUp, getCustomer } from "../../api/customers";
 import { Badge, Button, Input, Textarea } from "../../components/atoms";
 import { FormField } from "../../components/molecules";
 import { ApiError } from "../../lib/api-client";
+import { useAuth } from "../../lib/auth-context";
+import { canWrite, writeDeniedTitle } from "../../lib/permissions";
 import { useToast } from "../../lib/toast-context";
 
 const STATUS_BADGE_VARIANT: Record<CustomerStatus, "neutral" | "success" | "danger"> = {
@@ -29,6 +31,8 @@ function DetailField({ label, value }: { label: string; value: ReactNode }) {
 function CustomerDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const canEdit = canWrite(user?.role, "customers");
   const { showToast } = useToast();
   const queryClient = useQueryClient();
 
@@ -88,7 +92,13 @@ function CustomerDetailPage() {
             <p className="text-sm text-slate-500">{customer.businessName}</p>
           )}
         </div>
-        <Button onClick={() => navigate(`/customers/${customer.id}/edit`)}>Edit</Button>
+        <Button
+          onClick={() => navigate(`/customers/${customer.id}/edit`)}
+          disabled={!canEdit}
+          title={canEdit ? undefined : writeDeniedTitle("customers")}
+        >
+          Edit
+        </Button>
       </div>
 
       <dl className="grid grid-cols-1 gap-6 rounded-md bg-white p-6 shadow sm:grid-cols-2">
@@ -126,7 +136,12 @@ function CustomerDetailPage() {
             <Input type="date" {...register("followUpDate")} />
           </FormField>
           <div>
-            <Button type="submit" isLoading={isSubmitting || mutation.isPending}>
+            <Button
+              type="submit"
+              isLoading={isSubmitting || mutation.isPending}
+              disabled={!canEdit}
+              title={canEdit ? undefined : writeDeniedTitle("customers")}
+            >
               Add follow-up
             </Button>
           </div>

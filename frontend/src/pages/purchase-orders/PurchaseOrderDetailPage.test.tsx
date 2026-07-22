@@ -19,6 +19,7 @@ function renderPage(
       <AuthContext.Provider
         value={{
           user: { id: "user-1", name: "Test User", email: "test@flowerp.test", role },
+          isInitializing: false,
           login: vi.fn(),
           logout: vi.fn(),
         }}
@@ -75,20 +76,20 @@ describe("PurchaseOrderDetailPage", () => {
     vi.restoreAllMocks();
   });
 
-  it("shows Edit/Receive/Cancel for a Draft when the role can manage POs", async () => {
+  it("shows Edit/Receive/Cancel enabled for a Draft when the role can manage POs", async () => {
     vi.spyOn(apiClient, "apiRequest").mockResolvedValue({ data: buildPO({ status: "DRAFT" }) });
 
     renderPage("WAREHOUSE");
 
     await waitFor(() => expect(screen.getByText("PO-2026-000001")).toBeInTheDocument());
-    expect(screen.getByRole("button", { name: "Edit" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Receive" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Cancel PO" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Edit" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Receive" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Cancel PO" })).toBeEnabled();
 
     vi.restoreAllMocks();
   });
 
-  it("shows only Cancel for a Received PO", async () => {
+  it("shows only Cancel for a Received PO — Edit/Receive aren't valid in that state for anyone", async () => {
     vi.spyOn(apiClient, "apiRequest").mockResolvedValue({ data: buildPO({ status: "RECEIVED" }) });
 
     renderPage("ADMIN");
@@ -96,12 +97,12 @@ describe("PurchaseOrderDetailPage", () => {
     await waitFor(() => expect(screen.getByText("PO-2026-000001")).toBeInTheDocument());
     expect(screen.queryByRole("button", { name: "Edit" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Receive" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Cancel PO" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Cancel PO" })).toBeEnabled();
 
     vi.restoreAllMocks();
   });
 
-  it("shows no management actions for a Cancelled PO", async () => {
+  it("shows no management actions for a Cancelled PO — none are valid in that state for anyone", async () => {
     vi.spyOn(apiClient, "apiRequest").mockResolvedValue({ data: buildPO({ status: "CANCELLED" }) });
 
     renderPage("ADMIN");
@@ -115,16 +116,21 @@ describe("PurchaseOrderDetailPage", () => {
   });
 
   it.each(["SALES", "ACCOUNTS"] as const)(
-    "hides all management actions for %s regardless of status",
+    "shows Edit/Receive/Cancel as disabled (not hidden) for %s on a Draft PO, with an explanation",
     async (role) => {
       vi.spyOn(apiClient, "apiRequest").mockResolvedValue({ data: buildPO({ status: "DRAFT" }) });
 
       renderPage(role);
 
       await waitFor(() => expect(screen.getByText("PO-2026-000001")).toBeInTheDocument());
-      expect(screen.queryByRole("button", { name: "Edit" })).not.toBeInTheDocument();
-      expect(screen.queryByRole("button", { name: "Receive" })).not.toBeInTheDocument();
-      expect(screen.queryByRole("button", { name: "Cancel PO" })).not.toBeInTheDocument();
+      const editButton = screen.getByRole("button", { name: "Edit" });
+      const receiveButton = screen.getByRole("button", { name: "Receive" });
+      const cancelButton = screen.getByRole("button", { name: "Cancel PO" });
+
+      expect(editButton).toBeDisabled();
+      expect(receiveButton).toBeDisabled();
+      expect(cancelButton).toBeDisabled();
+      expect(editButton).toHaveAttribute("title", "Only Admin and Warehouse can do this.");
 
       vi.restoreAllMocks();
     },

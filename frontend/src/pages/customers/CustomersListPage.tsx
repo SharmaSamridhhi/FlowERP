@@ -7,6 +7,8 @@ import { Badge, Button, Select } from "../../components/atoms";
 import { Pagination, SearchBar } from "../../components/molecules";
 import { DataTable } from "../../components/organisms";
 import type { DataTableColumn } from "../../components/organisms";
+import { useAuth } from "../../lib/auth-context";
+import { canWrite, writeDeniedTitle } from "../../lib/permissions";
 
 const TYPE_FILTER_OPTIONS = [
   { value: "", label: "All types" },
@@ -36,6 +38,8 @@ const SEARCH_DEBOUNCE_MS = 300;
 // specs/FLO-012-customer-crm.md's acceptance criteria.
 function CustomersListPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const canAdd = canWrite(user?.role, "customers");
   const [searchParams, setSearchParams] = useSearchParams();
 
   const page = Number(searchParams.get("page") ?? "1");
@@ -141,7 +145,13 @@ function CustomersListPage() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-semibold text-slate-900">Customers</h1>
-        <Button onClick={() => navigate("/customers/new")}>Add Customer</Button>
+        <Button
+          onClick={() => navigate("/customers/new")}
+          disabled={!canAdd}
+          title={canAdd ? undefined : writeDeniedTitle("customers")}
+        >
+          Add Customer
+        </Button>
       </div>
 
       <div className="flex flex-wrap gap-3">
