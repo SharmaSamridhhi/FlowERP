@@ -38,6 +38,39 @@ export const UpdateProductSchema = z
   .partial();
 export type UpdateProductInput = z.infer<typeof UpdateProductSchema>;
 
+// --- Product image upload (FLO-024) ---
+//
+// Presigned-URL flow, not a server-proxied upload: the browser PUTs the
+// file directly to S3 using a short-lived signed URL, keeping binary
+// traffic off the Express server entirely. See specs/FLO-024-product-image-s3.md.
+export const PRODUCT_IMAGE_CONTENT_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
+export const ProductImageContentTypeSchema = z.enum(PRODUCT_IMAGE_CONTENT_TYPES);
+export type ProductImageContentType = z.infer<typeof ProductImageContentTypeSchema>;
+
+export const MAX_PRODUCT_IMAGE_BYTES = 5 * 1024 * 1024; // 5MB
+
+export const RequestProductImageUploadSchema = z.object({
+  contentType: ProductImageContentTypeSchema,
+  fileSizeBytes: z.coerce
+    .number()
+    .int()
+    .positive()
+    .max(MAX_PRODUCT_IMAGE_BYTES, "Image must be 5MB or smaller"),
+});
+export type RequestProductImageUploadInput = z.infer<typeof RequestProductImageUploadSchema>;
+
+export const ProductImageUploadUrlSchema = z.object({
+  uploadUrl: z.string(),
+  objectKey: z.string(),
+  expiresInSeconds: z.number(),
+});
+export type ProductImageUploadUrl = z.infer<typeof ProductImageUploadUrlSchema>;
+
+export const ConfirmProductImageSchema = z.object({
+  objectKey: z.string().min(1, "Object key is required"),
+});
+export type ConfirmProductImageInput = z.infer<typeof ConfirmProductImageSchema>;
+
 export const ListProductsQuerySchema = z.object({
   ...PaginationQuery.shape,
   search: z.string().optional(),
@@ -61,6 +94,7 @@ export const ProductSchema = z.object({
   currentStock: z.number(),
   minStockAlertQuantity: z.number(),
   location: z.string().nullable(),
+  imageUrl: z.string().nullable(),
   isLowStock: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),

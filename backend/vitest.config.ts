@@ -20,6 +20,14 @@ export default defineConfig({
       // against a real, separate database rather than the dev one or a
       // mock — see backend/TESTING.md and specs/FLO-011-auth-rbac.md.
       DATABASE_URL: testDatabaseUrl,
+      // Obviously-fake AWS config so product-image.service tests exercise
+      // the real code path with the S3 SDK itself mocked (vi.mock) rather
+      // than short-circuiting on "not configured" — no real AWS calls are
+      // ever made in CI. See specs/FLO-024-product-image-s3.md.
+      AWS_REGION: "us-east-1",
+      AWS_ACCESS_KEY_ID: "test-access-key-id",
+      AWS_SECRET_ACCESS_KEY: "test-secret-access-key",
+      AWS_BUCKET_NAME: "flowerp-test-bucket",
     },
     coverage: {
       provider: "v8",

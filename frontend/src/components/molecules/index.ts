@@ -1,6 +1,7 @@
 export * from "./FormField";
 export * from "./Modal";
 export * from "./Pagination";
+export * from "./ProductImage";
 export * from "./SearchBar";
 export * from "./SearchSelect";
 export * from "./SparkLineChart";

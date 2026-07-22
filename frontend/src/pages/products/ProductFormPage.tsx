@@ -1,15 +1,51 @@
-import { CreateProductSchema } from "@flowerp/shared";
-import type { CreateProductInput } from "@flowerp/shared";
+import {
+  CreateProductSchema,
+  MAX_PRODUCT_IMAGE_BYTES,
+  PRODUCT_IMAGE_CONTENT_TYPES,
+} from "@flowerp/shared";
+import type { CreateProductInput, ProductImageContentType } from "@flowerp/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { ChangeEvent } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
-import { createProduct, getProduct, updateProduct } from "../../api/products";
+import {
+  confirmProductImage,
+  createProduct,
+  getProduct,
+  requestImageUploadUrl,
+  updateProduct,
+  uploadFileToPresignedUrl,
+} from "../../api/products";
 import { Button, Input } from "../../components/atoms";
-import { FormField } from "../../components/molecules";
+import { UploadCloudIcon } from "../../components/atoms/icons";
+import { FormField, ProductImage } from "../../components/molecules";
 import { ApiError } from "../../lib/api-client";
 import { useToast } from "../../lib/toast-context";
+
+function validateImageFile(file: File): string | null {
+  if (!(PRODUCT_IMAGE_CONTENT_TYPES as readonly string[]).includes(file.type)) {
+    return "Please choose a JPEG, PNG, or WebP image.";
+  }
+  if (file.size > MAX_PRODUCT_IMAGE_BYTES) {
+    return "Image must be 5MB or smaller.";
+  }
+  return null;
+}
+
+// Presign -> direct browser PUT to S3 -> confirm. Only ever runs after the
+// product itself exists (create must succeed first), since the S3 object
+// key is scoped by product id. See specs/FLO-024-product-image-s3.md.
+async function uploadProductImage(productId: string, file: File): Promise<void> {
+  const contentType = file.type as ProductImageContentType;
+  const presign = await requestImageUploadUrl(productId, {
+    contentType,
+    fileSizeBytes: file.size,
+  });
+  await uploadFileToPresignedUrl(presign.data.uploadUrl, file, contentType);
+  await confirmProductImage(productId, { objectKey: presign.data.objectKey });
+}
 
 function ProductFormPage() {
   const { id } = useParams<{ id: string }>();
@@ -18,6 +54,50 @@ function ProductFormPage() {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
+  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) {
+      return;
+    }
+    const error = validateImageFile(file);
+    if (error) {
+      setFileError(error);
+      return;
+    }
+    setFileError(null);
+    setSelectedFile(file);
+    setPreviewUrl((prev) => {
+      if (prev) {
+        URL.revokeObjectURL(prev);
+      }
+      return URL.createObjectURL(file);
+    });
+  }
+
+  function clearSelectedFile() {
+    setSelectedFile(null);
+    setPreviewUrl((prev) => {
+      if (prev) {
+        URL.revokeObjectURL(prev);
+      }
+      return null;
+    });
+  }
 
   const existingProductQuery = useQuery({
     queryKey: ["products", id],
@@ -68,10 +148,31 @@ function ProductFormPage() {
     },
     onSuccess: async (response) => {
       await queryClient.invalidateQueries({ queryKey: ["products"] });
-      showToast(
-        "success",
-        isEditing ? "Product updated successfully." : "Product created successfully.",
-      );
+
+      if (selectedFile) {
+        setIsUploadingImage(true);
+        try {
+          await uploadProductImage(response.data.id, selectedFile);
+          await queryClient.invalidateQueries({ queryKey: ["products", response.data.id] });
+          showToast(
+            "success",
+            isEditing ? "Product and image updated." : "Product and image created.",
+          );
+        } catch {
+          showToast(
+            "error",
+            "Product saved, but the image upload failed. You can try again from the edit page.",
+          );
+        } finally {
+          setIsUploadingImage(false);
+        }
+      } else {
+        showToast(
+          "success",
+          isEditing ? "Product updated successfully." : "Product created successfully.",
+        );
+      }
+
       navigate(`/products/${response.data.id}`);
     },
     onError: (err) => {
@@ -131,6 +232,50 @@ function ProductFormPage() {
           <Input {...register("location")} />
         </FormField>
 
+        <div className="flex flex-col gap-2">
+          <span className="text-sm font-medium text-slate-700">Product image</span>
+          <div className="flex items-center gap-4">
+            <ProductImage
+              src={previewUrl ?? existingProductQuery.data?.data.imageUrl}
+              alt={existingProductQuery.data?.data.name ?? "Product"}
+              size="lg"
+            />
+            <div className="flex flex-col items-start gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept={PRODUCT_IMAGE_CONTENT_TYPES.join(",")}
+                onChange={handleFileChange}
+                className="hidden"
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <UploadCloudIcon className="h-4 w-4" />
+                {selectedFile ? "Choose a different image" : "Choose image"}
+              </Button>
+              {selectedFile && (
+                <button
+                  type="button"
+                  onClick={clearSelectedFile}
+                  className="text-xs text-slate-500 hover:text-slate-700 hover:underline"
+                >
+                  Remove selected image
+                </button>
+              )}
+              <p className="text-xs text-slate-500">JPEG, PNG, or WebP. Max 5MB.</p>
+              {fileError && (
+                <p role="alert" className="text-xs text-red-600">
+                  {fileError}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
         {serverError && (
           <p role="alert" className="text-sm text-red-600">
             {serverError}
@@ -141,7 +286,7 @@ function ProductFormPage() {
           <Button type="button" variant="secondary" onClick={() => navigate(-1)}>
             Cancel
           </Button>
-          <Button type="submit" isLoading={isSubmitting || mutation.isPending}>
+          <Button type="submit" isLoading={isSubmitting || mutation.isPending || isUploadingImage}>
             {isEditing ? "Save changes" : "Create product"}
           </Button>
         </div>

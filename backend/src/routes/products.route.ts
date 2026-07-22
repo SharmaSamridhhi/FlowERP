@@ -1,13 +1,16 @@
 import {
+  ConfirmProductImageSchema,
   CreateProductSchema,
   CreateStockMovementSchema,
   ListProductsQuerySchema,
   ListStockMovementsQuerySchema,
+  RequestProductImageUploadSchema,
   UpdateProductSchema,
 } from "@flowerp/shared";
 import { Router } from "express";
 import { z } from "zod";
 import * as productController from "../controllers/product.controller.js";
+import * as productImageController from "../controllers/product-image.controller.js";
 import * as stockMovementController from "../controllers/stock-movement.controller.js";
 import { authenticate } from "../middlewares/authenticate.middleware.js";
 import { authorize } from "../middlewares/authorize.middleware.js";
@@ -39,6 +42,24 @@ productsRoute.patch(
   authorize("ADMIN", "WAREHOUSE"),
   validateRequest({ params: productIdParams, body: UpdateProductSchema }),
   productController.update,
+);
+
+// Product image upload (specs/FLO-024-product-image-s3.md): same
+// read-broad/write-restricted role matrix as the product entity itself.
+// Presigned-URL flow — the browser uploads directly to S3 between these
+// two calls, never through this server.
+productsRoute.post(
+  "/:id/image-upload-url",
+  authorize("ADMIN", "WAREHOUSE"),
+  validateRequest({ params: productIdParams, body: RequestProductImageUploadSchema }),
+  productImageController.requestUploadUrl,
+);
+
+productsRoute.post(
+  "/:id/image",
+  authorize("ADMIN", "WAREHOUSE"),
+  validateRequest({ params: productIdParams, body: ConfirmProductImageSchema }),
+  productImageController.confirm,
 );
 
 // Stock movement ledger (specs/FLO-014-stock-movement-ledger.md): same

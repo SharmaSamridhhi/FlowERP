@@ -12,7 +12,7 @@ import { NotFoundError } from "../utils/errors.js";
 // customer.service.ts's toCustomerResponse. `isLowStock` is always derived
 // here, never stored, so the frontend never re-implements the comparison
 // (see specs/FLO-013-product-inventory-catalog.md).
-function toProductResponse(product: PrismaProduct): Product {
+export function toProductResponse(product: PrismaProduct): Product {
   return {
     id: product.id,
     name: product.name,
@@ -22,6 +22,7 @@ function toProductResponse(product: PrismaProduct): Product {
     currentStock: product.currentStock,
     minStockAlertQuantity: product.minStockAlertQuantity,
     location: product.location,
+    imageUrl: product.imageUrl,
     isLowStock: product.currentStock <= product.minStockAlertQuantity,
     createdAt: product.createdAt.toISOString(),
     updatedAt: product.updatedAt.toISOString(),

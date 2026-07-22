@@ -246,6 +246,26 @@ export function TruckIcon(props: IconProps) {
   );
 }
 
+export function ImageIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <circle cx="8.5" cy="9.5" r="1.75" />
+      <path d="m4 17 5-5 4 4 3-3 4 4" />
+    </svg>
+  );
+}
+
+export function UploadCloudIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M7 17.5a4 4 0 0 1 .5-7.97A5.5 5.5 0 0 1 18 11a3.5 3.5 0 0 1-1 6.5" />
+      <path d="M12 20v-8.5" />
+      <path d="m9 14.5 3-3 3 3" />
+    </svg>
+  );
+}
+
 export function PackageBoxLogoIcon(props: IconProps) {
   return (
     <svg {...base(props)} strokeWidth={2}>
