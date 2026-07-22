@@ -37,3 +37,15 @@ export async function list(req: Request, res: Response): Promise<void> {
   };
   res.status(200).json(body);
 }
+
+export async function listAll(req: Request, res: Response): Promise<void> {
+  const query = req.validated?.query as ListStockMovementsQuery;
+
+  const { items, total } = await stockMovementService.listAllStockMovements(query);
+
+  const body: SuccessEnvelope<StockMovement[]> = {
+    data: items,
+    meta: { pagination: buildPaginationMeta(total, query.page, query.limit) },
+  };
+  res.status(200).json(body);
+}
