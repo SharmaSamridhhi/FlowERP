@@ -46,6 +46,7 @@ export const ListProductsQuerySchema = z.object({
     .enum(["true", "false"])
     .optional()
     .transform((val) => (val === undefined ? undefined : val === "true")),
+  stockStatus: z.enum(["in_stock", "out_of_stock"]).optional(),
 });
 export type ListProductsQuery = z.infer<typeof ListProductsQuerySchema>;
 

@@ -40,6 +40,7 @@ export const ListCustomersQuerySchema = z.object({
   search: z.string().optional(),
   type: CustomerTypeSchema.optional(),
   status: CustomerStatusSchema.optional(),
+  overdue: z.coerce.boolean().optional(),
 });
 export type ListCustomersQuery = z.infer<typeof ListCustomersQuerySchema>;
 

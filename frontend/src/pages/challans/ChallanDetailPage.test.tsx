@@ -43,6 +43,7 @@ function buildChallan(overrides: Partial<SalesChallanWithItems> = {}): SalesChal
     challanNumber: "CH-2026-000001",
     status: "DRAFT",
     totalQuantity: 3,
+    totalAmount: 13.5,
     customerId: "cust-1",
     customerName: "Acme Distribution",
     createdById: "user-1",

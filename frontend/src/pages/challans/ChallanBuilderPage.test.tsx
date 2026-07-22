@@ -61,6 +61,7 @@ function draftChallan(overrides: Partial<SalesChallanWithItems> = {}): SalesChal
     challanNumber: "CH-2026-000001",
     status: "DRAFT",
     totalQuantity: 2,
+    totalAmount: 9,
     customerId: CUSTOMER.id,
     customerName: CUSTOMER.name,
     createdById: "user-1",

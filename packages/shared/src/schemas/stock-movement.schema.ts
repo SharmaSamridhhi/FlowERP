@@ -22,6 +22,8 @@ export type CreateStockMovementInput = z.infer<typeof CreateStockMovementSchema>
 
 export const ListStockMovementsQuerySchema = z.object({
   ...PaginationQuery.shape,
+  productId: z.string().optional(),
+  type: StockMovementTypeSchema.optional(),
 });
 export type ListStockMovementsQuery = z.infer<typeof ListStockMovementsQuerySchema>;
 
@@ -30,6 +32,8 @@ export type ListStockMovementsQuery = z.infer<typeof ListStockMovementsQuerySche
 export const StockMovementSchema = z.object({
   id: z.string(),
   productId: z.string(),
+  productName: z.string(),
+  productSku: z.string(),
   quantity: z.number(),
   type: StockMovementTypeSchema,
   reason: z.string(),
