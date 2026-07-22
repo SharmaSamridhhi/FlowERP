@@ -5,18 +5,31 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import * as apiClient from "../../lib/api-client";
+import { AuthContext } from "../../lib/auth-context";
 import CustomersListPage from "./CustomersListPage";
 
-function renderPage(initialEntry = "/customers") {
+function renderPage(
+  role: "ADMIN" | "SALES" | "WAREHOUSE" | "ACCOUNTS" = "ADMIN",
+  initialEntry = "/customers",
+) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={[initialEntry]}>
-        <Routes>
-          <Route path="/customers" element={<CustomersListPage />} />
-          <Route path="/customers/new" element={<p>Add customer page</p>} />
-        </Routes>
-      </MemoryRouter>
+      <AuthContext.Provider
+        value={{
+          user: { id: "user-1", name: "Test User", email: "test@flowerp.test", role },
+          isInitializing: false,
+          login: vi.fn(),
+          logout: vi.fn(),
+        }}
+      >
+        <MemoryRouter initialEntries={[initialEntry]}>
+          <Routes>
+            <Route path="/customers" element={<CustomersListPage />} />
+            <Route path="/customers/new" element={<p>Add customer page</p>} />
+          </Routes>
+        </MemoryRouter>
+      </AuthContext.Provider>
     </QueryClientProvider>,
   );
 }
@@ -99,6 +112,22 @@ describe("CustomersListPage", () => {
     await userEvent.click(screen.getByRole("button", { name: "Add Customer" }));
 
     await waitFor(() => expect(screen.getByText("Add customer page")).toBeInTheDocument());
+
+    vi.restoreAllMocks();
+  });
+
+  it("disables (not hides) Add Customer for a role that can't write customers, with an explanation", async () => {
+    vi.spyOn(apiClient, "apiRequest").mockResolvedValue({
+      data: [],
+      meta: { pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } },
+    });
+
+    renderPage("WAREHOUSE");
+
+    await waitFor(() => expect(screen.getByText("No customers found.")).toBeInTheDocument());
+    const addButton = screen.getByRole("button", { name: "Add Customer" });
+    expect(addButton).toBeDisabled();
+    expect(addButton).toHaveAttribute("title", "Only Admin and Sales can do this.");
 
     vi.restoreAllMocks();
   });

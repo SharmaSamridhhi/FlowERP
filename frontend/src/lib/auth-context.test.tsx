@@ -4,11 +4,15 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import * as apiClient from "./api-client";
 import { AuthProvider, useAuth } from "./auth-context";
 
+const TOKEN_STORAGE_KEY = "flowerp_token";
+
 function TestConsumer() {
-  const { user, login, logout } = useAuth();
+  const { user, isInitializing, login, logout } = useAuth();
   return (
     <div>
-      <p data-testid="user">{user ? `${user.name} (${user.role})` : "no user"}</p>
+      <p data-testid="user">
+        {isInitializing ? "initializing" : user ? `${user.name} (${user.role})` : "no user"}
+      </p>
       <button
         onClick={() => {
           login("admin@flowerp.test", "password").catch(() => undefined);
@@ -24,6 +28,7 @@ function TestConsumer() {
 describe("AuthProvider / useAuth", () => {
   afterEach(() => {
     vi.restoreAllMocks();
+    sessionStorage.clear();
   });
 
   it("throws when useAuth is used outside an AuthProvider", () => {
@@ -48,15 +53,17 @@ describe("AuthProvider / useAuth", () => {
       </AuthProvider>,
     );
 
-    expect(screen.getByTestId("user")).toHaveTextContent("no user");
+    await waitFor(() => expect(screen.getByTestId("user")).toHaveTextContent("no user"));
 
     await userEvent.click(screen.getByRole("button", { name: "Login" }));
 
     await waitFor(() => expect(screen.getByTestId("user")).toHaveTextContent("Admin User (ADMIN)"));
+    expect(sessionStorage.getItem(TOKEN_STORAGE_KEY)).toBe("fake-token");
 
     await userEvent.click(screen.getByRole("button", { name: "Logout" }));
 
     expect(screen.getByTestId("user")).toHaveTextContent("no user");
+    expect(sessionStorage.getItem(TOKEN_STORAGE_KEY)).toBeNull();
   });
 
   it("does not set a user when login fails", async () => {
@@ -70,8 +77,45 @@ describe("AuthProvider / useAuth", () => {
       </AuthProvider>,
     );
 
+    await waitFor(() => expect(screen.getByTestId("user")).toHaveTextContent("no user"));
+
     await userEvent.click(screen.getByRole("button", { name: "Login" }));
 
     expect(screen.getByTestId("user")).toHaveTextContent("no user");
+    expect(sessionStorage.getItem(TOKEN_STORAGE_KEY)).toBeNull();
+  });
+
+  it("restores the session from a token already in sessionStorage on mount", async () => {
+    sessionStorage.setItem(TOKEN_STORAGE_KEY, "existing-token");
+    vi.spyOn(apiClient, "apiRequest").mockResolvedValue({
+      data: { id: "2", name: "Sales User", email: "sales@flowerp.test", role: "SALES" },
+    });
+
+    render(
+      <AuthProvider>
+        <TestConsumer />
+      </AuthProvider>,
+    );
+
+    expect(screen.getByTestId("user")).toHaveTextContent("initializing");
+
+    await waitFor(() => expect(screen.getByTestId("user")).toHaveTextContent("Sales User (SALES)"));
+    expect(apiClient.apiRequest).toHaveBeenCalledWith("/auth/me");
+  });
+
+  it("clears an invalid/expired token found in sessionStorage on mount", async () => {
+    sessionStorage.setItem(TOKEN_STORAGE_KEY, "stale-token");
+    vi.spyOn(apiClient, "apiRequest").mockRejectedValue(
+      new apiClient.ApiError(401, "UNAUTHORIZED", "Invalid token"),
+    );
+
+    render(
+      <AuthProvider>
+        <TestConsumer />
+      </AuthProvider>,
+    );
+
+    await waitFor(() => expect(screen.getByTestId("user")).toHaveTextContent("no user"));
+    expect(sessionStorage.getItem(TOKEN_STORAGE_KEY)).toBeNull();
   });
 });

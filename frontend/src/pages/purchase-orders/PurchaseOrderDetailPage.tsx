@@ -12,6 +12,7 @@ import { Badge, Button } from "../../components/atoms";
 import { Modal } from "../../components/molecules";
 import { ApiError } from "../../lib/api-client";
 import { useAuth } from "../../lib/auth-context";
+import { canWrite, writeDeniedTitle } from "../../lib/permissions";
 import { useToast } from "../../lib/toast-context";
 
 const STATUS_BADGE_VARIANT: Record<PurchaseOrderStatus, "neutral" | "success" | "danger"> = {
@@ -19,10 +20,6 @@ const STATUS_BADGE_VARIANT: Record<PurchaseOrderStatus, "neutral" | "success" | 
   RECEIVED: "success",
   CANCELLED: "danger",
 };
-
-// Roles permitted to create/edit/receive/cancel a PO (see
-// specs/FLO-017-purchase-order.md's role matrix).
-const CAN_MANAGE_PO_ROLES = new Set(["ADMIN", "WAREHOUSE"]);
 
 function DetailField({ label, value }: { label: string; value: ReactNode }) {
   return (
@@ -110,7 +107,8 @@ function PurchaseOrderDetailPage() {
   }
 
   const po = poQuery.data.data;
-  const canManage = Boolean(user?.role && CAN_MANAGE_PO_ROLES.has(user.role));
+  const canManage = canWrite(user?.role, "purchaseOrders");
+  const deniedTitle = writeDeniedTitle("purchaseOrders");
 
   return (
     <div className="flex flex-col gap-6">
@@ -120,24 +118,33 @@ function PurchaseOrderDetailPage() {
           <p className="text-sm text-slate-500">{po.supplierName}</p>
         </div>
         <div className="flex gap-2">
-          {canManage && po.status === "DRAFT" && (
+          {po.status === "DRAFT" && (
             <>
               <Button
                 variant="secondary"
                 onClick={() => navigate(`/purchase-orders/${po.id}/edit`)}
+                disabled={!canManage}
+                title={canManage ? undefined : deniedTitle}
               >
                 Edit
               </Button>
               <Button
                 isLoading={receiveMutation.isPending}
                 onClick={() => receiveMutation.mutate()}
+                disabled={!canManage}
+                title={canManage ? undefined : deniedTitle}
               >
                 Receive
               </Button>
             </>
           )}
-          {canManage && po.status !== "CANCELLED" && (
-            <Button variant="secondary" onClick={() => setIsCancelModalOpen(true)}>
+          {po.status !== "CANCELLED" && (
+            <Button
+              variant="secondary"
+              onClick={() => setIsCancelModalOpen(true)}
+              disabled={!canManage}
+              title={canManage ? undefined : deniedTitle}
+            >
               Cancel PO
             </Button>
           )}

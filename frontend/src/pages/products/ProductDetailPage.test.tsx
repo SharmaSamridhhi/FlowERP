@@ -22,6 +22,7 @@ function renderPage(
       <AuthContext.Provider
         value={{
           user: { id: "user-1", name: "Test User", email: "test@flowerp.test", role },
+          isInitializing: false,
           login: vi.fn(),
           logout: vi.fn(),
         }}
@@ -142,24 +143,30 @@ describe("ProductDetailPage", () => {
     vi.restoreAllMocks();
   });
 
-  it("shows the Adjust Stock action for ADMIN and WAREHOUSE", async () => {
+  it("enables Adjust Stock and Edit for ADMIN and WAREHOUSE", async () => {
     mockApiRequest();
 
     renderPage("WAREHOUSE");
 
     await waitFor(() => expect(screen.getByText("Steel Bolt")).toBeInTheDocument());
-    expect(screen.getByRole("button", { name: "Adjust Stock" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Adjust Stock" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Edit" })).toBeEnabled();
 
     vi.restoreAllMocks();
   });
 
-  it("hides the Adjust Stock action for SALES and ACCOUNTS", async () => {
+  it("disables (not hides) Adjust Stock and Edit for SALES and ACCOUNTS, with an explanation", async () => {
     mockApiRequest();
 
     renderPage("SALES");
 
     await waitFor(() => expect(screen.getByText("Steel Bolt")).toBeInTheDocument());
-    expect(screen.queryByRole("button", { name: "Adjust Stock" })).not.toBeInTheDocument();
+    const adjustButton = screen.getByRole("button", { name: "Adjust Stock" });
+    const editButton = screen.getByRole("button", { name: "Edit" });
+
+    expect(adjustButton).toBeDisabled();
+    expect(editButton).toBeDisabled();
+    expect(adjustButton).toHaveAttribute("title", "Only Admin and Warehouse can do this.");
 
     vi.restoreAllMocks();
   });

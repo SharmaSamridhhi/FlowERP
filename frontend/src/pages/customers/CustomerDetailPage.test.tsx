@@ -5,21 +5,34 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import * as apiClient from "../../lib/api-client";
+import { AuthContext } from "../../lib/auth-context";
 import { ToastProvider } from "../../lib/toast-context";
 import CustomerDetailPage from "./CustomerDetailPage";
 
-function renderPage(initialEntry = "/customers/cust-1") {
+function renderPage(
+  role: "ADMIN" | "SALES" | "WAREHOUSE" | "ACCOUNTS" = "ADMIN",
+  initialEntry = "/customers/cust-1",
+) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={queryClient}>
-      <ToastProvider>
-        <MemoryRouter initialEntries={[initialEntry]}>
-          <Routes>
-            <Route path="/customers/:id" element={<CustomerDetailPage />} />
-            <Route path="/customers/:id/edit" element={<p>Edit customer page</p>} />
-          </Routes>
-        </MemoryRouter>
-      </ToastProvider>
+      <AuthContext.Provider
+        value={{
+          user: { id: "user-1", name: "Test User", email: "test@flowerp.test", role },
+          isInitializing: false,
+          login: vi.fn(),
+          logout: vi.fn(),
+        }}
+      >
+        <ToastProvider>
+          <MemoryRouter initialEntries={[initialEntry]}>
+            <Routes>
+              <Route path="/customers/:id" element={<CustomerDetailPage />} />
+              <Route path="/customers/:id/edit" element={<p>Edit customer page</p>} />
+            </Routes>
+          </MemoryRouter>
+        </ToastProvider>
+      </AuthContext.Provider>
     </QueryClientProvider>,
   );
 }
@@ -131,6 +144,22 @@ describe("CustomerDetailPage", () => {
     await userEvent.click(screen.getByRole("button", { name: "Edit" }));
 
     await waitFor(() => expect(screen.getByText("Edit customer page")).toBeInTheDocument());
+
+    vi.restoreAllMocks();
+  });
+
+  it("disables (not hides) Edit and Add follow-up for a role that can't write customers", async () => {
+    vi.spyOn(apiClient, "apiRequest").mockResolvedValue({ data: CUSTOMER });
+
+    renderPage("WAREHOUSE");
+
+    await waitFor(() => expect(screen.getByText("Acme Distribution")).toBeInTheDocument());
+    const editButton = screen.getByRole("button", { name: "Edit" });
+    const followUpButton = screen.getByRole("button", { name: "Add follow-up" });
+
+    expect(editButton).toBeDisabled();
+    expect(followUpButton).toBeDisabled();
+    expect(editButton).toHaveAttribute("title", "Only Admin and Sales can do this.");
 
     vi.restoreAllMocks();
   });

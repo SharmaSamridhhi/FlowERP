@@ -8,6 +8,7 @@ import { Badge, Button } from "../../components/atoms";
 import { Modal } from "../../components/molecules";
 import { ApiError } from "../../lib/api-client";
 import { useAuth } from "../../lib/auth-context";
+import { canWrite, writeDeniedTitle } from "../../lib/permissions";
 import { useToast } from "../../lib/toast-context";
 
 const STATUS_BADGE_VARIANT: Record<SalesChallanStatus, "neutral" | "success" | "danger"> = {
@@ -15,10 +16,6 @@ const STATUS_BADGE_VARIANT: Record<SalesChallanStatus, "neutral" | "success" | "
   CONFIRMED: "success",
   CANCELLED: "danger",
 };
-
-// Roles permitted to create/edit/confirm/cancel a challan (see
-// specs/FLO-015-sales-challan-backend.md's role matrix).
-const CAN_MANAGE_CHALLAN_ROLES = new Set(["ADMIN", "SALES"]);
 
 function DetailField({ label, value }: { label: string; value: ReactNode }) {
   return (
@@ -99,7 +96,8 @@ function ChallanDetailPage() {
   }
 
   const challan = challanQuery.data.data;
-  const canManage = Boolean(user?.role && CAN_MANAGE_CHALLAN_ROLES.has(user.role));
+  const canManage = canWrite(user?.role, "challans");
+  const deniedTitle = writeDeniedTitle("challans");
 
   return (
     <div className="flex flex-col gap-6">
@@ -109,21 +107,33 @@ function ChallanDetailPage() {
           <p className="text-sm text-slate-500">{challan.customerName}</p>
         </div>
         <div className="flex gap-2">
-          {canManage && challan.status === "DRAFT" && (
+          {challan.status === "DRAFT" && (
             <>
-              <Button variant="secondary" onClick={() => navigate(`/challans/${challan.id}/edit`)}>
+              <Button
+                variant="secondary"
+                onClick={() => navigate(`/challans/${challan.id}/edit`)}
+                disabled={!canManage}
+                title={canManage ? undefined : deniedTitle}
+              >
                 Edit
               </Button>
               <Button
                 isLoading={confirmMutation.isPending}
                 onClick={() => confirmMutation.mutate()}
+                disabled={!canManage}
+                title={canManage ? undefined : deniedTitle}
               >
                 Confirm
               </Button>
             </>
           )}
-          {canManage && challan.status !== "CANCELLED" && (
-            <Button variant="secondary" onClick={() => setIsCancelModalOpen(true)}>
+          {challan.status !== "CANCELLED" && (
+            <Button
+              variant="secondary"
+              onClick={() => setIsCancelModalOpen(true)}
+              disabled={!canManage}
+              title={canManage ? undefined : deniedTitle}
+            >
               Cancel Challan
             </Button>
           )}

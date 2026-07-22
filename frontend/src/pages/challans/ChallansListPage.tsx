@@ -8,6 +8,8 @@ import { Badge, Button, Select } from "../../components/atoms";
 import { Pagination, SearchBar, SearchSelect } from "../../components/molecules";
 import { DataTable } from "../../components/organisms";
 import type { DataTableColumn } from "../../components/organisms";
+import { useAuth } from "../../lib/auth-context";
+import { canWrite, writeDeniedTitle } from "../../lib/permissions";
 
 const STATUS_FILTER_OPTIONS = [
   { value: "", label: "All statuses" },
@@ -29,6 +31,8 @@ const SEARCH_DEBOUNCE_MS = 300;
 // CustomersListPage.tsx/ProductsListPage.tsx (specs/FLO-012/013).
 function ChallansListPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const canAdd = canWrite(user?.role, "challans");
   const [searchParams, setSearchParams] = useSearchParams();
 
   const page = Number(searchParams.get("page") ?? "1");
@@ -175,7 +179,13 @@ function ChallansListPage() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-semibold text-slate-900">Sales Challans</h1>
-        <Button onClick={() => navigate("/challans/new")}>New Challan</Button>
+        <Button
+          onClick={() => navigate("/challans/new")}
+          disabled={!canAdd}
+          title={canAdd ? undefined : writeDeniedTitle("challans")}
+        >
+          New Challan
+        </Button>
       </div>
 
       <div className="flex flex-wrap items-start gap-3">
