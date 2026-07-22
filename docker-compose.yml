@@ -1,0 +1,53 @@
+# Orchestrates the whole stack for local development/demo use with one
+# command: `docker compose up --build`.
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-flowerp}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-flowerp_local_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-flowerp}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-flowerp} -d ${POSTGRES_DB:-flowerp}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-flowerp}:${POSTGRES_PASSWORD:-flowerp_local_dev_password}@db:5432/${POSTGRES_DB:-flowerp}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set — copy .env.example to .env and fill it in}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-8h}
+      CORS_ORIGIN: http://localhost:${FRONTEND_PORT:-8080}
+      SEED_USER_PASSWORD: ${SEED_USER_PASSWORD:-FlowERP123!}
+    ports:
+      - "${BACKEND_PORT:-4000}:4000"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:${BACKEND_PORT:-4000}
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-8080}:8080"
+
+volumes:
+  postgres-data:
