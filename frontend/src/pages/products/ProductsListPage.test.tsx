@@ -108,7 +108,7 @@ describe("ProductsListPage", () => {
 
     renderPage();
 
-    await userEvent.click(screen.getByRole("button", { name: "Add Product" }));
+    await userEvent.click(screen.getByRole("button", { name: "Add New Product" }));
 
     await waitFor(() => expect(screen.getByText("Add product page")).toBeInTheDocument());
 
@@ -124,7 +124,7 @@ describe("ProductsListPage", () => {
     renderPage("SALES");
 
     await waitFor(() => expect(screen.getByText("No products found.")).toBeInTheDocument());
-    const addButton = screen.getByRole("button", { name: "Add Product" });
+    const addButton = screen.getByRole("button", { name: "Add New Product" });
     expect(addButton).toBeDisabled();
     expect(addButton).toHaveAttribute("title", "Only Admin and Warehouse can do this.");
 
