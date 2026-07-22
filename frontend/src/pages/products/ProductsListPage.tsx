@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { listProducts } from "../../api/products";
 import { Badge, Button, Select } from "../../components/atoms";
-import { Pagination, SearchBar } from "../../components/molecules";
+import { Pagination, ProductImage, SearchBar } from "../../components/molecules";
 import { DataTable } from "../../components/organisms";
 import type { DataTableColumn } from "../../components/organisms";
 import { useAuth } from "../../lib/auth-context";
@@ -143,14 +143,17 @@ function ProductsListPage() {
         key: "name",
         header: "Product Details",
         render: (product) => (
-          <div>
-            <Link
-              to={`/products/${product.id}`}
-              className="text-brand-700 font-medium hover:underline"
-            >
-              {product.name}
-            </Link>
-            <p className="text-xs text-slate-500">Min Stock: {product.minStockAlertQuantity}</p>
+          <div className="flex items-center gap-3">
+            <ProductImage src={product.imageUrl} alt={product.name} size="sm" />
+            <div>
+              <Link
+                to={`/products/${product.id}`}
+                className="text-brand-700 font-medium hover:underline"
+              >
+                {product.name}
+              </Link>
+              <p className="text-xs text-slate-500">Min Stock: {product.minStockAlertQuantity}</p>
+            </div>
           </div>
         ),
       },

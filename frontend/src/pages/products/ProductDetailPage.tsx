@@ -9,7 +9,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { getProduct } from "../../api/products";
 import { createStockMovement } from "../../api/stock-movements";
 import { Badge, Button, Input, Select, Textarea } from "../../components/atoms";
-import { FormField, Modal } from "../../components/molecules";
+import { FormField, Modal, ProductImage } from "../../components/molecules";
 import { StockMovementLog } from "../../components/organisms";
 import { ApiError } from "../../lib/api-client";
 import { useAuth } from "../../lib/auth-context";
@@ -137,9 +137,12 @@ function ProductDetailPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-semibold text-slate-900">{product.name}</h1>
-          <p className="text-sm text-slate-500">{product.sku}</p>
+        <div className="flex items-center gap-4">
+          <ProductImage src={product.imageUrl} alt={product.name} size="md" />
+          <div>
+            <h1 className="text-lg font-semibold text-slate-900">{product.name}</h1>
+            <p className="text-sm text-slate-500">{product.sku}</p>
+          </div>
         </div>
         <div className="flex gap-2">
           <Button

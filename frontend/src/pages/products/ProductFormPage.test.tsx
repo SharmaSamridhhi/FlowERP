@@ -124,4 +124,37 @@ describe("ProductFormPage", () => {
 
     vi.restoreAllMocks();
   });
+
+  it("rejects an image over 5MB client-side", async () => {
+    renderPage();
+
+    const oversized = new File([new Uint8Array(6 * 1024 * 1024)], "product.png", {
+      type: "image/png",
+    });
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    await userEvent.upload(input, oversized);
+
+    expect(await screen.findByText("Image must be 5MB or smaller.")).toBeInTheDocument();
+
+    vi.restoreAllMocks();
+  });
+
+  it("shows a preview once a valid image is selected", async () => {
+    const objectUrl = "blob:mock-preview-url";
+    vi.stubGlobal("URL", {
+      ...URL,
+      createObjectURL: vi.fn().mockReturnValue(objectUrl),
+      revokeObjectURL: vi.fn(),
+    });
+
+    renderPage();
+
+    const file = new File(["fake-image-bytes"], "product.png", { type: "image/png" });
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    await userEvent.upload(input, file);
+
+    expect(await screen.findByRole("img", { name: "Product" })).toHaveAttribute("src", objectUrl);
+
+    vi.unstubAllGlobals();
+  });
 });

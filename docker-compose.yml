@@ -34,6 +34,12 @@ services:
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-8h}
       CORS_ORIGIN: http://localhost:${FRONTEND_PORT:-8080}
       SEED_USER_PASSWORD: ${SEED_USER_PASSWORD:-FlowERP123!}
+      # Product image upload (FLO-024) — optional; leave unset for a fully
+      # functional stack minus the image-upload endpoints (503).
+      AWS_REGION: ${AWS_REGION:-}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_BUCKET_NAME: ${AWS_BUCKET_NAME:-}
     ports:
       - "${BACKEND_PORT:-4000}:4000"
 

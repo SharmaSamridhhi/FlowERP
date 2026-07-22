@@ -24,6 +24,14 @@ const envSchema = z.object({
   // (frontend/vite.config.ts has no override, so Vite's default 5173
   // applies). Production deployments must set this explicitly.
   CORS_ORIGIN: z.string().min(1).default("http://localhost:5173"),
+  // Product image upload (FLO-024) — optional so the app boots and stays
+  // fully functional without AWS configured (Product.imageUrl is nullable
+  // everywhere); the upload endpoints themselves reject with a clear 503
+  // if these are unset rather than the whole server failing to start.
+  AWS_REGION: z.string().optional(),
+  AWS_ACCESS_KEY_ID: z.string().optional(),
+  AWS_SECRET_ACCESS_KEY: z.string().optional(),
+  AWS_BUCKET_NAME: z.string().optional(),
 });
 
 interface Env {
@@ -33,6 +41,10 @@ interface Env {
   jwtSecret: string;
   jwtExpiresIn: string;
   corsOrigin: string;
+  awsRegion: string | undefined;
+  awsAccessKeyId: string | undefined;
+  awsSecretAccessKey: string | undefined;
+  awsBucketName: string | undefined;
 }
 
 function loadEnv(): Env {
@@ -52,6 +64,10 @@ function loadEnv(): Env {
     jwtSecret: result.data.JWT_SECRET,
     jwtExpiresIn: result.data.JWT_EXPIRES_IN,
     corsOrigin: result.data.CORS_ORIGIN,
+    awsRegion: result.data.AWS_REGION,
+    awsAccessKeyId: result.data.AWS_ACCESS_KEY_ID,
+    awsSecretAccessKey: result.data.AWS_SECRET_ACCESS_KEY,
+    awsBucketName: result.data.AWS_BUCKET_NAME,
   };
 }
 
