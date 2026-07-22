@@ -18,21 +18,26 @@ import { recordMovement } from "./stock-movement.service.js";
 
 const CHALLAN_LIST_INCLUDE = {
   customer: { select: { name: true } },
-} satisfies Prisma.SalesChallanInclude;
-const CHALLAN_DETAIL_INCLUDE = {
-  customer: { select: { name: true } },
   items: true,
 } satisfies Prisma.SalesChallanInclude;
+const CHALLAN_DETAIL_INCLUDE = CHALLAN_LIST_INCLUDE;
 
-type ChallanWithCustomer = PrismaSalesChallan & { customer: { name: string } };
-type ChallanWithItems = ChallanWithCustomer & { items: PrismaSalesChallanItem[] };
+type ChallanWithItems = PrismaSalesChallan & {
+  customer: { name: string };
+  items: PrismaSalesChallanItem[];
+};
 
-function toChallanResponse(challan: ChallanWithCustomer): SalesChallan {
+function toChallanResponse(challan: ChallanWithItems): SalesChallan {
+  const totalAmount = challan.items.reduce(
+    (sum, item) => sum + item.quantity * item.unitPriceSnapshot.toNumber(),
+    0,
+  );
   return {
     id: challan.id,
     challanNumber: challan.challanNumber,
     status: challan.status,
     totalQuantity: challan.totalQuantity,
+    totalAmount,
     customerId: challan.customerId,
     customerName: challan.customer.name,
     createdById: challan.createdById,

@@ -13,6 +13,12 @@ export function listStockMovements(
   return apiRequest<StockMovement[]>(`/products/${productId}/stock-movements`, { query });
 }
 
+export function listAllStockMovements(
+  query: ListStockMovementsQuery,
+): Promise<SuccessEnvelope<StockMovement[]>> {
+  return apiRequest<StockMovement[]>("/stock-movements", { query });
+}
+
 export function createStockMovement(
   productId: string,
   data: CreateStockMovementInput,

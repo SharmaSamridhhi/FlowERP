@@ -46,7 +46,7 @@ export async function createCustomer(
 export async function listCustomers(
   query: ListCustomersQuery,
 ): Promise<{ items: Customer[]; total: number }> {
-  const { page, limit, search, type, status } = query;
+  const { page, limit, search, type, status, overdue } = query;
 
   const where: Prisma.CustomerWhereInput = {
     ...(search
@@ -61,6 +61,7 @@ export async function listCustomers(
       : {}),
     ...(type ? { type } : {}),
     ...(status ? { status } : {}),
+    ...(overdue ? { followUpDate: { lt: new Date() } } : {}),
   };
 
   const [items, total] = await Promise.all([

@@ -56,6 +56,7 @@ export const SalesChallanSchema = z.object({
   challanNumber: z.string(),
   status: SalesChallanStatusSchema,
   totalQuantity: z.number(),
+  totalAmount: z.number(),
   customerId: z.string(),
   customerName: z.string(),
   createdById: z.string(),

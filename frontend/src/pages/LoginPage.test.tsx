@@ -37,7 +37,7 @@ describe("LoginPage", () => {
 
     renderLoginPage();
 
-    await userEvent.type(screen.getByLabelText("Email"), "admin@flowerp.test");
+    await userEvent.type(screen.getByLabelText("Email Address"), "admin@flowerp.test");
     await userEvent.type(screen.getByLabelText("Password"), "password");
     await userEvent.click(screen.getByRole("button", { name: "Log in" }));
 
@@ -51,12 +51,12 @@ describe("LoginPage", () => {
 
     renderLoginPage();
 
-    await userEvent.type(screen.getByLabelText("Email"), "admin@flowerp.test");
+    await userEvent.type(screen.getByLabelText("Email Address"), "admin@flowerp.test");
     await userEvent.type(screen.getByLabelText("Password"), "wrong-password");
     await userEvent.click(screen.getByRole("button", { name: "Log in" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Invalid email or password");
-    expect(screen.getByLabelText("Email")).toBeInTheDocument();
+    expect(screen.getByLabelText("Email Address")).toBeInTheDocument();
   });
 
   it("redirects back to the originally-requested route after login", async () => {
@@ -64,7 +64,7 @@ describe("LoginPage", () => {
 
     renderLoginPage({ pathname: "/login", state: { from: { pathname: "/customers" } } });
 
-    await userEvent.type(screen.getByLabelText("Email"), "admin@flowerp.test");
+    await userEvent.type(screen.getByLabelText("Email Address"), "admin@flowerp.test");
     await userEvent.type(screen.getByLabelText("Password"), "password");
     await userEvent.click(screen.getByRole("button", { name: "Log in" }));
 

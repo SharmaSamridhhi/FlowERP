@@ -18,6 +18,8 @@ function renderLog() {
 const MOVEMENT: StockMovement = {
   id: "move-1",
   productId: "prod-1",
+  productName: "Steel Bolt",
+  productSku: "BOLT-001",
   quantity: 10,
   type: "IN",
   reason: "Initial stock",

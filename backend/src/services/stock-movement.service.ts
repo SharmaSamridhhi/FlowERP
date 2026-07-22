@@ -10,12 +10,17 @@ import { ConflictError, NotFoundError } from "../utils/errors.js";
 
 type Client = typeof prisma | Prisma.TransactionClient;
 
-type StockMovementWithAuthor = PrismaStockMovement & { createdBy: { name: string } };
+type StockMovementWithAuthor = PrismaStockMovement & {
+  createdBy: { name: string };
+  product: { name: string; sku: string };
+};
 
 function toStockMovementResponse(movement: StockMovementWithAuthor): StockMovement {
   return {
     id: movement.id,
     productId: movement.productId,
+    productName: movement.product.name,
+    productSku: movement.product.sku,
     quantity: movement.quantity,
     type: movement.type,
     reason: movement.reason,
@@ -76,7 +81,10 @@ async function performMovement(
       sourceId: input.sourceId,
       createdById: input.createdById,
     },
-    include: { createdBy: { select: { name: true } } },
+    include: {
+      createdBy: { select: { name: true } },
+      product: { select: { name: true, sku: true } },
+    },
   });
 
   return toStockMovementResponse(movement);
@@ -120,7 +128,41 @@ export async function listStockMovements(
       orderBy: { createdAt: "desc" },
       skip: (query.page - 1) * query.limit,
       take: query.limit,
-      include: { createdBy: { select: { name: true } } },
+      include: {
+        createdBy: { select: { name: true } },
+        product: { select: { name: true, sku: true } },
+      },
+    }),
+    prisma.stockMovement.count({ where }),
+  ]);
+
+  return { items: items.map(toStockMovementResponse), total };
+}
+
+// Cross-product feed (the Stock Movements page's global audit log) —
+// unlike listStockMovements above, productId is an optional filter rather
+// than a required, existence-checked scope.
+export async function listAllStockMovements(query: {
+  page: number;
+  limit: number;
+  productId?: string;
+  type?: StockMovementType;
+}): Promise<{ items: StockMovement[]; total: number }> {
+  const where: Prisma.StockMovementWhereInput = {
+    ...(query.productId ? { productId: query.productId } : {}),
+    ...(query.type ? { type: query.type } : {}),
+  };
+
+  const [items, total] = await Promise.all([
+    prisma.stockMovement.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: (query.page - 1) * query.limit,
+      take: query.limit,
+      include: {
+        createdBy: { select: { name: true } },
+        product: { select: { name: true, sku: true } },
+      },
     }),
     prisma.stockMovement.count({ where }),
   ]);

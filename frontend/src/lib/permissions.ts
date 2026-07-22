@@ -22,7 +22,7 @@ export function canWrite(role: Role | null | undefined, resource: WriteResource)
   return role != null && (WRITE_ROLES[resource] as readonly Role[]).includes(role);
 }
 
-const ROLE_LABELS: Record<Role, string> = {
+export const ROLE_LABELS: Record<Role, string> = {
   ADMIN: "Admin",
   SALES: "Sales",
   WAREHOUSE: "Warehouse",

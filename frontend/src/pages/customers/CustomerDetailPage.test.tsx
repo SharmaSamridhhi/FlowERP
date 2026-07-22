@@ -62,9 +62,26 @@ const CUSTOMER: CustomerWithFollowUps = {
   ],
 };
 
+const EMPTY_CHALLANS_ENVELOPE = {
+  data: [] as unknown[],
+  meta: { pagination: { page: 1, limit: 1, total: 0, totalPages: 1 } },
+};
+
+// The page also queries /challans (customer detail's Total Sales / Open
+// Orders tiles and recent-challans list) alongside /customers/:id — this
+// mock branches on path so both call shapes get a sensible response.
+function mockApiFor(customer: CustomerWithFollowUps) {
+  return (path: string) => {
+    if (path.startsWith("/challans")) {
+      return Promise.resolve(EMPTY_CHALLANS_ENVELOPE);
+    }
+    return Promise.resolve({ data: customer });
+  };
+}
+
 describe("CustomerDetailPage", () => {
   it("renders customer fields and follow-up history", async () => {
-    vi.spyOn(apiClient, "apiRequest").mockResolvedValue({ data: CUSTOMER });
+    vi.spyOn(apiClient, "apiRequest").mockImplementation(mockApiFor(CUSTOMER));
 
     renderPage();
 
@@ -77,19 +94,21 @@ describe("CustomerDetailPage", () => {
   });
 
   it("shows the empty state when there are no follow-ups", async () => {
-    vi.spyOn(apiClient, "apiRequest").mockResolvedValue({
-      data: { ...CUSTOMER, followUps: [] },
-    });
+    vi.spyOn(apiClient, "apiRequest").mockImplementation(
+      mockApiFor({ ...CUSTOMER, followUps: [] }),
+    );
 
     renderPage();
 
-    await waitFor(() => expect(screen.getByText("No follow-ups yet.")).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText("No follow-ups recorded yet.")).toBeInTheDocument(),
+    );
 
     vi.restoreAllMocks();
   });
 
   it("submits a new follow-up note and refetches the detail query", async () => {
-    const apiRequestSpy = vi.spyOn(apiClient, "apiRequest").mockImplementation((_path, options) => {
+    const apiRequestSpy = vi.spyOn(apiClient, "apiRequest").mockImplementation((path, options) => {
       if (options?.method === "POST") {
         return Promise.resolve({
           data: {
@@ -100,6 +119,9 @@ describe("CustomerDetailPage", () => {
             authorName: "Sales Rep",
           },
         });
+      }
+      if (path.startsWith("/challans")) {
+        return Promise.resolve(EMPTY_CHALLANS_ENVELOPE);
       }
       return Promise.resolve({
         data: { ...CUSTOMER, followUps: [...CUSTOMER.followUps] },
@@ -136,7 +158,7 @@ describe("CustomerDetailPage", () => {
   });
 
   it("navigates to the edit page", async () => {
-    vi.spyOn(apiClient, "apiRequest").mockResolvedValue({ data: CUSTOMER });
+    vi.spyOn(apiClient, "apiRequest").mockImplementation(mockApiFor(CUSTOMER));
 
     renderPage();
 
@@ -149,7 +171,7 @@ describe("CustomerDetailPage", () => {
   });
 
   it("disables (not hides) Edit and Add follow-up for a role that can't write customers", async () => {
-    vi.spyOn(apiClient, "apiRequest").mockResolvedValue({ data: CUSTOMER });
+    vi.spyOn(apiClient, "apiRequest").mockImplementation(mockApiFor(CUSTOMER));
 
     renderPage("WAREHOUSE");
 

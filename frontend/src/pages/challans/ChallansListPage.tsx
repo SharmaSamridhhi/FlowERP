@@ -5,6 +5,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { getCustomer, listCustomers } from "../../api/customers";
 import { listChallans } from "../../api/sales-challans";
 import { Badge, Button, Select } from "../../components/atoms";
+import { DownloadIcon } from "../../components/atoms/icons";
 import { Pagination, SearchBar, SearchSelect } from "../../components/molecules";
 import { DataTable } from "../../components/organisms";
 import type { DataTableColumn } from "../../components/organisms";
@@ -167,18 +168,52 @@ function ChallansListPage() {
       },
       { key: "totalQuantity", header: "Total Qty", render: (c) => c.totalQuantity },
       {
+        key: "totalAmount",
+        header: "Grand Total",
+        render: (c) => `$${c.totalAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })}`,
+      },
+      {
         key: "createdAt",
-        header: "Created",
+        header: "Date",
         render: (c) => new Date(c.createdAt).toLocaleDateString(),
       },
     ],
     [],
   );
 
+  function exportCsv() {
+    const rows = query.data?.data ?? [];
+    const header = ["Challan #", "Customer", "Status", "Total Qty", "Grand Total", "Date"];
+    const lines = rows.map((c) =>
+      [
+        c.challanNumber,
+        c.customerName,
+        c.status,
+        c.totalQuantity,
+        c.totalAmount.toFixed(2),
+        new Date(c.createdAt).toLocaleDateString(),
+      ]
+        .map((value) => `"${String(value).replace(/"/g, '""')}"`)
+        .join(","),
+    );
+    const csv = [header.join(","), ...lines].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "sales-challans.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className="flex flex-col gap-4">
+      <p className="text-sm text-slate-500">
+        Sales <span className="mx-1">›</span>
+        <span className="text-slate-700">Challan Management</span>
+      </p>
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-slate-900">Sales Challans</h1>
+        <h1 className="text-lg font-semibold text-slate-900">Sales Document Management</h1>
         <Button
           onClick={() => navigate("/challans/new")}
           disabled={!canAdd}
@@ -233,6 +268,14 @@ function ChallansListPage() {
             />
           )}
         </div>
+        <Button
+          variant="secondary"
+          onClick={exportCsv}
+          disabled={(query.data?.data.length ?? 0) === 0}
+        >
+          <DownloadIcon className="h-4 w-4" />
+          Export
+        </Button>
       </div>
 
       <DataTable
